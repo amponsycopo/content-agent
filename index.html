@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Agent — Erlan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --border: #222222;
+  --border2: #2a2a2a;
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --accent: #e8ff47;
+  --accent2: #b8cc00;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f97316;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── LAYOUT ── */
+.app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 0;
+  position: fixed; top: 0; left: 0;
+  width: 280px; height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 16px; color: #000;
+}
+.logo-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: var(--text); }
+.sidebar-sub { font-size: 12px; color: var(--text3); }
+
+.sidebar-section { padding: 16px 20px 8px; }
+.sidebar-label { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px;
+  cursor: pointer; transition: all 0.15s;
+  font-size: 14px; color: var(--text2);
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--accent); color: #000; font-weight: 600; }
+.nav-item.active .nav-icon { color: #000; }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-divider { height: 1px; background: var(--border); margin: 12px 20px; }
+
+.voice-card {
+  margin: 12px 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px; padding: 14px;
+}
+.voice-card-title { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.voice-tag {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 99px; margin: 2px 2px 2px 0;
+  background: rgba(232,255,71,0.1); color: var(--accent);
+  border: 1px solid rgba(232,255,71,0.2);
+}
+
+/* ── MAIN ── */
+.main { margin-left: 280px; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── TOPBAR ── */
+.topbar {
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg);
+  position: sticky; top: 0; z-index: 10;
+}
+.page-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+.page-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.credits-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 99px; padding: 6px 14px; font-size: 13px; color: var(--text2);
+}
+.credits-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; }
+
+/* ── CONTENT AREA ── */
+.content { padding: 28px 32px; flex: 1; }
+
+/* ── TABS ── */
+.tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface); border-radius: 10px; padding: 4px; width: fit-content; }
+.tab {
+  padding: 8px 20px; border-radius: 7px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text3);
+  transition: all 0.15s;
+}
+.tab.active { background: var(--accent); color: #000; }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* ── INPUT PANEL ── */
+.input-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+  margin-bottom: 24px;
+}
+.panel-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.panel-title span { font-size: 18px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
+
+.form-input, .form-select, .form-textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px; padding: 11px 14px;
+  font-size: 14px; color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+}
+.form-select { cursor: pointer; }
+.form-select option { background: var(--surface2); }
+.form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+.platform-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.platform-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 99px;
+  border: 1.5px solid var(--border2);
+  background: transparent; color: var(--text2);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.platform-btn.selected { border-color: var(--accent); background: rgba(232,255,71,0.08); color: var(--accent); }
+.platform-btn:hover:not(.selected) { border-color: var(--border); color: var(--text); }
+
+.generate-btn {
+  width: 100%; padding: 14px;
+  background: var(--accent); color: #000;
+  border: none; border-radius: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 16px;
+}
+.generate-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+.generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.generate-btn .spin { animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── OUTPUT ── */
+.output-area { display: flex; flex-direction: column; gap: 16px; }
+
+.output-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+
+.output-header {
+  padding: 14px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.output-platform { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+.output-platform-icon { font-size: 18px; }
+.output-actions { display: flex; gap: 8px; }
+.action-btn {
+  padding: 6px 14px; border-radius: 7px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-btn.copied { border-color: var(--green); color: var(--green); }
+
+.output-body { padding: 20px; }
+.output-section { margin-bottom: 20px; }
+.output-section:last-child { margin-bottom: 0; }
+.output-section-label {
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+}
+.output-text {
+  font-size: 14px; color: var(--text2); line-height: 1.75;
+  white-space: pre-wrap; background: var(--surface2);
+  border-radius: 10px; padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+.output-text strong { color: var(--text); }
+
+/* Slide preview */
+.slides-preview { display: flex; flex-direction: column; gap: 8px; }
+.slide-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface2); border-radius: 10px;
+  padding: 12px 14px; border: 1px solid var(--border);
+}
+.slide-num {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: var(--accent); color: #000;
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.slide-content { flex: 1; }
+.slide-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.slide-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* Hook preview */
+.hook-list { display: flex; flex-direction: column; gap: 6px; }
+.hook-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; background: var(--surface2);
+  border-radius: 9px; border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+}
+.hook-item:hover { border-color: var(--accent); }
+.hook-num { font-size: 11px; font-weight: 800; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+.hook-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 80px 40px;
+  text-align: center; color: var(--text3);
+  border: 2px dashed var(--border); border-radius: 16px;
+}
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text2); margin-bottom: 8px; }
+.empty-desc { font-size: 14px; line-height: 1.6; max-width: 320px; }
+
+/* History */
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.history-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px;
+  cursor: pointer; transition: all 0.15s;
+}
+.history-item:hover { border-color: var(--border2); background: var(--surface2); }
+.history-platform { font-size: 18px; }
+.history-info { flex: 1; }
+.history-topic { font-size: 13px; font-weight: 600; color: var(--text); }
+.history-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.history-badge {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 99px; background: var(--surface2); color: var(--text3);
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--accent); color: #000;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  transform: translateY(100px); opacity: 0;
+  transition: all 0.3s; z-index: 1000;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+
+.action-btn.saved { border-color: var(--green); color: var(--green); }
+.sheet-status { font-size: 12px; color: var(--text3); margin-top: 8px; text-align: right; }
+
+
+/* Library */
+.library-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 8px; }
+.library-item {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  position: relative;
+}
+.library-item:hover { border-color: var(--border); }
+.library-icon { font-size: 24px; flex-shrink: 0; }
+.library-info { flex: 1; min-width: 0; }
+.library-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.library-meta { font-size: 11px; color: var(--text3); }
+.library-delete {
+  position: absolute; top: 10px; right: 10px;
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 14px; padding: 2px 6px;
+  border-radius: 5px; transition: all 0.15s;
+}
+.library-delete:hover { background: rgba(239,68,68,0.1); color: var(--red); }
+.library-active-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; color: var(--green);
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
+  padding: 2px 8px; border-radius: 99px; margin-top: 4px;
+}
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: 12px;
+  padding: 32px; text-align: center; cursor: pointer;
+  transition: all 0.15s; position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(232,255,71,0.03); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-icon { font-size: 32px; margin-bottom: 10px; }
+.upload-text { font-size: 14px; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+.upload-sub { font-size: 12px; color: var(--text3); }
+.library-stats {
+  display: flex; gap: 16px; margin-bottom: 20px;
+  padding: 14px 18px; background: var(--surface2);
+  border-radius: 10px; border: 1px solid var(--border);
+}
+.lib-stat-num { font-size: 20px; font-weight: 800; color: var(--accent); }
+.lib-stat-label { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Page sections */
+.page-section { display: none; }
+.page-section.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">E</div>
+        <span class="logo-name">Content Agent</span>
+      </div>
+      <div class="sidebar-sub">by Erlan · Powered by Claude AI</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Menu</div>
+      <div class="nav-item active" onclick="showPage('generate')">
+        <span class="nav-icon">⚡</span> Generate Konten
+      </div>
+      <div class="nav-item" onclick="showPage('history')">
+        <span class="nav-icon">📋</span> Riwayat Konten
+      </div>
+      <div class="nav-item" onclick="showPage('voice')">
+        <span class="nav-icon">🎙️</span> Brand Voice
+      </div>
+      <div class="nav-item" onclick="showPage('library')">
+        <span class="nav-icon">📚</span> Content Library
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="voice-card">
+      <div class="voice-card-title">Brand Voice Aktif</div>
+      <div style="font-size:13px;color:#ccc;margin-bottom:10px;line-height:1.5;">Santai kayak temen, jujur, data-driven, anti bullshit</div>
+      <div>
+        <span class="voice-tag">Alex Hormozi</span>
+        <span class="voice-tag">Fery Irwandi</span>
+        <span class="voice-tag">Raymond Chin</span>
+      </div>
+    </div>
+
+    <div class="voice-card" style="margin-top:8px;">
+      <div class="voice-card-title">Content Library</div>
+      <div id="sidebar-lib-count" style="font-size:13px;color:#ccc;">0 file dimuat</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">Dipakai sebagai referensi tiap generate</div>
+    </div>
+
+    <div style="padding: 20px; margin-top: auto; border-top: 1px solid var(--border);">
+      <div style="font-size:12px;color:var(--text3);line-height:1.6;">
+        💡 Tip: Makin spesifik topiknya, makin tajam outputnya.
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="page-title">⚡ Generate Konten</div>
+        <div class="page-sub" id="page-sub">Masukkan topik, pilih platform, dan biarkan AI bekerja.</div>
+      </div>
+      <div class="credits-pill">
+        <div class="credits-dot"></div>
+        <span>Claude API Connected</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- PAGE: GENERATE -->
+      <div class="page-section active" id="page-generate">
+
+        <div class="input-panel">
+          <div class="panel-title"><span>🎯</span> Setup Konten</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Topik / Keyword</label>
+              <input class="form-input" id="topic" placeholder="Cth: rupiah melemah, margin bisnis, Iran-Israel..." />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Angle Konten</label>
+              <select class="form-select" id="angle">
+                <option value="pain">😤 Pain Point — bikin orang relate</option>
+                <option value="data">📊 Data Driven — angka & fakta</option>
+                <option value="macro">🌏 Makro ke Bisnis — dampak global ke lokal</option>
+                <option value="story">📖 Storytelling — cerita nyata</option>
+                <option value="contrarian">🔥 Contrarian — lawan ekspektasi</option>
+                <option value="howto">⚙️ How To — step by step</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label">Konteks Tambahan (opsional)</label>
+              <textarea class="form-textarea" id="context" placeholder="Cth: target audiens owner bisnis omzet 9 digit, fokus ke impact ke cashflow, ada angka riil yang bisa dipakai..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Platform</label>
+            <div class="platform-grid">
+              <button class="platform-btn selected" data-platform="instagram" onclick="togglePlatform(this)">📸 Instagram Carousel</button>
+              <button class="platform-btn selected" data-platform="tiktok" onclick="togglePlatform(this)">🎵 TikTok/Reels Script</button>
+              <button class="platform-btn selected" data-platform="twitter" onclick="togglePlatform(this)">🐦 Twitter Thread</button>
+            </div>
+          </div>
+
+          <button class="generate-btn" id="gen-btn" onclick="generateContent()">
+            <span id="gen-icon">⚡</span>
+            <span id="gen-text">Generate Sekarang</span>
+          </button>
+        </div>
+
+        <div class="output-area" id="output-area">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">✨</div>
+            <div class="empty-title">Belum ada output</div>
+            <div class="empty-desc">Isi topik di atas, pilih platform, dan klik Generate. AI akan buatin konten dengan gaya lo.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: HISTORY -->
+      <div class="page-section" id="page-history">
+        <div class="history-list" id="history-list">
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-title">Belum ada riwayat</div>
+            <div class="empty-desc">Konten yang sudah lo generate akan muncul di sini.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: VOICE -->
+      <div class="page-section" id="page-voice">
+        <div class="input-panel">
+          <div class="panel-title"><span>🎙️</span> Brand Voice Settings</div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label">Gaya Ngomong Lo</label>
+              <textarea class="form-textarea" id="voice-style" style="min-height:100px;">Santai kayak ngobrol sama temen. Jujur, ga ada basa-basi. Ga suka istilah yang terlalu formal atau corporate. Langsung ke intinya.</textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label">Nilai & Prinsip</label>
+              <textarea class="form-textarea" id="voice-values" style="min-height:80px;">Data-driven, anti bullshit, growth mindset. Ga suka konten yang terlalu motivasi kosong tanpa substansi.</textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label">Referensi Creator</label>
+              <input class="form-input" id="voice-refs" value="Alex Hormozi, Fery Irwandi, Raymond Chin" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full">
+              <label class="form-label">Contoh Konten Lo (opsional — paste konten yang pernah perform bagus)</label>
+              <textarea class="form-textarea" id="voice-examples" style="min-height:120px;" placeholder="Paste di sini contoh caption/skrip/thread yang pernah lo buat atau yang lo suka vibesnya..."></textarea>
+            </div>
+          </div>
+          <button class="generate-btn" onclick="saveVoice()" style="max-width:200px;">
+            💾 Simpan Voice
+          </button>
+        </div>
+      </div>
+
+      <!-- PAGE: LIBRARY -->
+      <div class="page-section" id="page-library">
+        <div class="input-panel" style="margin-bottom:20px;">
+          <div class="panel-title"><span>📚</span> Content Library</div>
+          <p style="font-size:14px;color:var(--text3);margin-bottom:20px;line-height:1.6;">
+            Upload file referensi — transkrip video viral, konten lo yang perform bagus, thread/caption favorit.
+            AI akan pelajari pola, struktur, dan ritme konten-konten ini sebagai DNA tiap generate.
+          </p>
+
+          <div class="library-stats">
+            <div>
+              <div class="lib-stat-num" id="lib-file-count">0</div>
+              <div class="lib-stat-label">File tersimpan</div>
+            </div>
+            <div style="width:1px;background:var(--border);"></div>
+            <div>
+              <div class="lib-stat-num" id="lib-char-count">0</div>
+              <div class="lib-stat-label">Total karakter</div>
+            </div>
+            <div style="width:1px;background:var(--border);"></div>
+            <div>
+              <div class="lib-stat-num" id="lib-active-count">0</div>
+              <div class="lib-stat-label">Aktif dipakai</div>
+            </div>
+          </div>
+
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" accept=".txt,.md" multiple onchange="handleFileUpload(event)">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Drop file di sini atau klik untuk upload</div>
+            <div class="upload-sub">Support .txt dan .md · Bisa upload banyak file sekaligus</div>
+          </div>
+
+          <div style="margin-top:12px;font-size:12px;color:var(--text3);line-height:1.6;">
+            💡 <strong style="color:var(--text2);">Tips cara dapet transkrip:</strong> Buka video YouTube →
+            klik ikon "..." → "Open transcript" → copy semua → paste di Notepad → save as .txt → upload di sini.
+          </div>
+        </div>
+
+        <div class="input-panel">
+          <div class="panel-title"><span>📁</span> File Tersimpan <span style="font-size:13px;font-weight:400;color:var(--text3);">— klik badge untuk aktif/nonaktif</span></div>
+          <div class="library-grid" id="library-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text3);">
+              <div style="font-size:32px;margin-bottom:8px;">📂</div>
+              <div>Belum ada file. Upload dulu di atas.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+let history = JSON.parse(localStorage.getItem('content_history') || '[]');
+let selectedPlatforms = ['instagram','tiktok','twitter'];
+let isGenerating = false;
+
+// Brand voice (editable di settings)
+function getVoice() {
+  return {
+    style: document.getElementById('voice-style')?.value || localStorage.getItem('voice_style') || 'Santai kayak ngobrol sama temen. Jujur, langsung ke intinya.',
+    values: document.getElementById('voice-values')?.value || localStorage.getItem('voice_values') || 'Data-driven, anti bullshit, growth mindset.',
+    refs: document.getElementById('voice-refs')?.value || localStorage.getItem('voice_refs') || 'Alex Hormozi, Fery Irwandi, Raymond Chin',
+    examples: document.getElementById('voice-examples')?.value || localStorage.getItem('voice_examples') || '',
+    library: getLibraryContext()
+  };
+}
+
+// ── Navigation ──
+function showPage(page) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  const titles = {
+    generate: ['⚡ Generate Konten', 'Masukkan topik, pilih platform, dan biarkan AI bekerja.'],
+    history: ['📋 Riwayat Konten', 'Semua konten yang sudah lo generate.'],
+    voice: ['🎙️ Brand Voice', 'Atur gaya dan karakter konten lo.']
+  };
+  document.getElementById('page-title').textContent = titles[page][0];
+  document.getElementById('page-sub').textContent = titles[page][1];
+
+  if (page === 'history') renderHistory();
+}
+
+// ── Platform toggle ──
+function togglePlatform(btn) {
+  const p = btn.dataset.platform;
+  btn.classList.toggle('selected');
+  if (btn.classList.contains('selected')) {
+    selectedPlatforms.push(p);
+  } else {
+    selectedPlatforms = selectedPlatforms.filter(x => x !== p);
+  }
+}
+
+// ── Generate ──
+async function generateContent() {
+  if (isGenerating) return;
+  const topic = document.getElementById('topic').value.trim();
+  const angle = document.getElementById('angle').value;
+  const context = document.getElementById('context').value.trim();
+
+  if (!topic) { showToast('❗ Isi topik dulu!'); return; }
+  if (selectedPlatforms.length === 0) { showToast('❗ Pilih minimal 1 platform!'); return; }
+
+  isGenerating = true;
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  document.getElementById('gen-icon').textContent = '⏳';
+  document.getElementById('gen-text').textContent = 'Generating...';
+
+  // Clear output
+  const outputArea = document.getElementById('output-area');
+  outputArea.innerHTML = '';
+
+  const voice = getVoice();
+  const angleLabels = {
+    pain: 'Pain Point — bikin orang relate dan sakit duluan sebelum dikasih solusi',
+    data: 'Data Driven — pakai angka, statistik, dan fakta konkret',
+    macro: 'Makro ke Bisnis — ambil isu global/ekonomi makro dan hubungkan ke dampak nyata ke bisnis lokal Indonesia',
+    story: 'Storytelling — cerita nyata atau skenario yang relatable',
+    contrarian: 'Contrarian — lawan ekspektasi umum, bikin orang mikir ulang',
+    howto: 'How To — step by step yang actionable dan praktis'
+  };
+
+  const platformNames = {
+    instagram: 'Instagram Carousel',
+    tiktok: 'TikTok/Reels Script',
+    twitter: 'Twitter Thread'
+  };
+
+  const platformInstructions = {
+    instagram: `Buat konten Instagram Carousel dengan format JSON seperti ini:
+{
+  "hook_options": ["hook 1", "hook 2", "hook 3"],
+  "slides": [
+    {"num": 1, "title": "judul slide", "content": "isi slide singkat"},
+    ...maksimal 7 slide
+  ],
+  "caption": "caption lengkap dengan emoji dan hashtag",
+  "cta": "call to action di akhir"
+}`,
+    tiktok: `Buat TikTok/Reels script dengan format JSON:
+{
+  "hook_options": ["hook verbal 1", "hook verbal 2", "hook verbal 3"],
+  "script": {
+    "opening": "kalimat pembuka 0-3 detik yang hook banget",
+    "body": "isi konten dalam paragraf, dengan [PAUSE], [ZOOM], [TEXT ON SCREEN: xxx] sebagai stage direction",
+    "closing": "kalimat penutup + CTA"
+  },
+  "duration": "estimasi durasi dalam detik",
+  "caption": "caption TikTok dengan hashtag"
+}`,
+    twitter: `Buat Twitter/X Thread dengan format JSON:
+{
+  "hook_options": ["hook tweet 1", "hook tweet 2", "hook tweet 3"],
+  "tweets": [
+    {"num": 1, "text": "tweet pertama (hook/pembuka)"},
+    ...5-8 tweet total
+  ],
+  "engagement_tweet": "tweet terakhir untuk mancing reply/RT"
+}`
+  };
+
+  for (const platform of selectedPlatforms) {
+    const prompt = `Kamu adalah content writer dengan brand voice sebagai berikut:
+- Gaya: ${voice.style}
+- Nilai: ${voice.values}
+- Referensi creator: ${voice.refs}
+${voice.examples ? `- Contoh konten (teks): ${voice.examples}` : ''}
+${voice.library ? `\n=== REFERENSI KONTEN LIBRARY ===\nBerikut adalah koleksi konten viral dan referensi yang harus kamu pelajari pola, struktur, ritme, dan cara membangun tension-nya. JANGAN copy paste — pelajari DNA-nya dan terapkan ke output baru:\n${voice.library}\n=== END LIBRARY ===` : ''}
+
+Topik: "${topic}"
+Angle: ${angleLabels[angle]}
+${context ? `Konteks tambahan: ${context}` : ''}
+Target audiens: Owner bisnis omzet Rp 100 juta - 1 miliar per bulan di Indonesia.
+Bahasa: Indonesia. Casual, no basa-basi, langsung ke poin.
+
+${platformInstructions[platform]}
+
+PENTING: 
+- Output HANYA JSON valid, tidak ada teks lain sama sekali
+- Hook harus bikin orang berhenti scroll dalam 1-2 detik
+- Gaya harus terasa seperti manusia, bukan AI
+- Anti filler words dan kalimat motivasi kosong
+- Pakai data/angka kalau relevan`;
+
+    // Create output card placeholder
+    const card = document.createElement('div');
+    card.className = 'output-card';
+    card.id = `card-${platform}`;
+    card.innerHTML = `
+      <div class="output-header">
+        <div class="output-platform">
+          <span class="output-platform-icon">${platform === 'instagram' ? '📸' : platform === 'tiktok' ? '🎵' : '🐦'}</span>
+          ${platformNames[platform]}
+        </div>
+        <div style="font-size:13px;color:var(--text3);">Generating<span class="spin"> ⚡</span></div>
+      </div>
+      <div class="output-body">
+        <div style="color:var(--text3);font-size:14px;padding:20px 0;text-align:center;">Sedang ditulis...</div>
+      </div>`;
+    outputArea.appendChild(card);
+
+    try {
+      const res = await fetch('/api/content-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+      const raw = data.text || '';
+
+      let parsed;
+      try {
+        const clean = raw.replace(/```json|```/g, '').trim();
+        parsed = JSON.parse(clean);
+      } catch(e) {
+        parsed = null;
+      }
+
+      renderOutputCard(card, platform, platformNames[platform], parsed, raw, topic, angle);
+
+      // Save to history
+      history.unshift({ platform, topic, angle, content: parsed || raw, timestamp: new Date().toISOString() });
+      if (history.length > 50) history.pop();
+      localStorage.setItem('content_history', JSON.stringify(history));
+
+    } catch(err) {
+      card.querySelector('.output-body').innerHTML = `<div style="color:var(--red);padding:16px;">Error: ${err.message}</div>`;
+    }
+  }
+
+  isGenerating = false;
+  btn.disabled = false;
+  document.getElementById('gen-icon').textContent = '⚡';
+  document.getElementById('gen-text').textContent = 'Generate Sekarang';
+  showToast('✅ Konten siap!');
+}
+
+// ── Render output card ──
+function renderOutputCard(card, platform, platformName, data, raw, topic, angle) {
+  let bodyHtml = '';
+
+  if (!data) {
+    bodyHtml = `<div class="output-section"><div class="output-text">${raw}</div></div>`;
+  } else if (platform === 'instagram') {
+    // Hooks
+    if (data.hook_options?.length) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">🎣 Hook Options (pilih satu)</div>
+        <div class="hook-list">
+          ${data.hook_options.map((h,i) => `<div class="hook-item"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span></div>`).join('')}
+        </div>
+      </div>`;
+    }
+    // Slides
+    if (data.slides?.length) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">📑 Slides (${data.slides.length} slide)</div>
+        <div class="slides-preview">
+          ${data.slides.map(s => `
+            <div class="slide-item">
+              <div class="slide-num">${s.num}</div>
+              <div class="slide-content">
+                <div class="slide-title">${s.title}</div>
+                <div class="slide-desc">${s.content}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    }
+    // Caption
+    if (data.caption) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">📝 Caption</div>
+        <div class="output-text">${data.caption}</div>
+      </div>`;
+    }
+  } else if (platform === 'tiktok') {
+    if (data.hook_options?.length) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">🎣 Hook Pembuka (pilih satu)</div>
+        <div class="hook-list">
+          ${data.hook_options.map((h,i) => `<div class="hook-item"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span></div>`).join('')}
+        </div>
+      </div>`;
+    }
+    if (data.script) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">🎬 Script ${data.duration ? `· ~${data.duration}` : ''}</div>
+        <div class="output-text">
+<strong>OPENING:</strong>
+${data.script.opening || ''}
+
+<strong>BODY:</strong>
+${data.script.body || ''}
+
+<strong>CLOSING:</strong>
+${data.script.closing || ''}
+        </div>
+      </div>`;
+    }
+    if (data.caption) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">📝 Caption</div>
+        <div class="output-text">${data.caption}</div>
+      </div>`;
+    }
+  } else if (platform === 'twitter') {
+    if (data.hook_options?.length) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">🎣 Hook Tweet (pilih satu)</div>
+        <div class="hook-list">
+          ${data.hook_options.map((h,i) => `<div class="hook-item"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span></div>`).join('')}
+        </div>
+      </div>`;
+    }
+    if (data.tweets?.length) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">🧵 Thread (${data.tweets.length} tweets)</div>
+        <div class="slides-preview">
+          ${data.tweets.map(t => `
+            <div class="slide-item">
+              <div class="slide-num">${t.num}</div>
+              <div class="slide-content">
+                <div class="slide-desc">${t.text}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    }
+    if (data.engagement_tweet) {
+      bodyHtml += `<div class="output-section">
+        <div class="output-section-label">💬 Engagement Tweet</div>
+        <div class="output-text">${data.engagement_tweet}</div>
+      </div>`;
+    }
+  }
+
+  const fullText = JSON.stringify(data || raw, null, 2);
+
+  card.innerHTML = `
+    <div class="output-header">
+      <div class="output-platform">
+        <span class="output-platform-icon">${platform === 'instagram' ? '📸' : platform === 'tiktok' ? '🎵' : '🐦'}</span>
+        ${platformName}
+      </div>
+      <div class="output-actions">
+        <button class="action-btn" onclick="copyContent(this, \`${fullText.replace(/`/g,'\\`')}\`)">Copy All</button>
+        <button class="action-btn" onclick="saveToSheet(this, '${platform}', topic, angle, data)">📊 Save to Sheet</button>
+      </div>
+    </div>
+    <div class="output-body">${bodyHtml}</div>`;
+}
+
+// ── History ──
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  if (history.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Belum ada riwayat</div><div class="empty-desc">Konten yang sudah lo generate akan muncul di sini.</div></div>`;
+    return;
+  }
+
+  const platformNames = { instagram: 'Instagram Carousel', tiktok: 'TikTok/Reels', twitter: 'Twitter Thread' };
+  const platformIcons = { instagram: '📸', tiktok: '🎵', twitter: '🐦' };
+  const angleNames = { pain: 'Pain Point', data: 'Data Driven', macro: 'Makro', story: 'Storytelling', contrarian: 'Contrarian', howto: 'How To' };
+
+  container.innerHTML = history.map((h, i) => `
+    <div class="history-item">
+      <div class="history-platform">${platformIcons[h.platform] || '📄'}</div>
+      <div class="history-info">
+        <div class="history-topic">${h.topic}</div>
+        <div class="history-meta">${platformNames[h.platform]} · ${angleNames[h.angle]} · ${new Date(h.timestamp).toLocaleDateString('id-ID')}</div>
+      </div>
+      <div class="history-badge">${angleNames[h.angle]}</div>
+    </div>`).join('');
+}
+
+// ── Content Library ──
+let contentLibrary = JSON.parse(localStorage.getItem('content_library') || '[]');
+
+function handleFileUpload(event) {
+  const files = Array.from(event.target.files);
+  let processed = 0;
+
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const existing = contentLibrary.find(f => f.name === file.name);
+      if (existing) {
+        existing.content = e.target.result;
+        existing.size = file.size;
+        existing.date = new Date().toISOString();
+      } else {
+        contentLibrary.push({
+          id: Date.now() + Math.random(),
+          name: file.name,
+          content: e.target.result,
+          size: file.size,
+          date: new Date().toISOString(),
+          active: true
+        });
+      }
+      processed++;
+      if (processed === files.length) {
+        localStorage.setItem('content_library', JSON.stringify(contentLibrary));
+        renderLibrary();
+        updateLibraryStats();
+        showToast(`✅ ${files.length} file berhasil diupload!`);
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+function deleteLibraryFile(id) {
+  contentLibrary = contentLibrary.filter(f => f.id !== id);
+  localStorage.setItem('content_library', JSON.stringify(contentLibrary));
+  renderLibrary();
+  updateLibraryStats();
+  showToast('🗑️ File dihapus');
+}
+
+function toggleLibraryFile(id) {
+  const file = contentLibrary.find(f => f.id === id);
+  if (file) {
+    file.active = !file.active;
+    localStorage.setItem('content_library', JSON.stringify(contentLibrary));
+    renderLibrary();
+    updateLibraryStats();
+  }
+}
+
+function getLibraryContext() {
+  const activeFiles = contentLibrary.filter(f => f.active);
+  if (!activeFiles.length) return '';
+  const combined = activeFiles.map(f => `=== ${f.name} ===\n${f.content}`).join('\n\n');
+  // Limit to 8000 chars biar ga overflow context
+  return combined.length > 8000 ? combined.substring(0, 8000) + '\n[...dipotong karena terlalu panjang]' : combined;
+}
+
+function renderLibrary() {
+  const grid = document.getElementById('library-grid');
+  if (!grid) return;
+
+  if (!contentLibrary.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text3);"><div style="font-size:32px;margin-bottom:8px;">📂</div><div>Belum ada file. Upload dulu di atas.</div></div>';
+    return;
+  }
+
+  const typeIcon = (name) => {
+    if (name.includes('hormozi') || name.includes('alex')) return '💪';
+    if (name.includes('fery') || name.includes('irwandi')) return '🇮🇩';
+    if (name.includes('raymond')) return '📈';
+    if (name.includes('transkrip') || name.includes('video')) return '🎬';
+    if (name.includes('thread') || name.includes('twitter')) return '🐦';
+    if (name.includes('caption') || name.includes('ig')) return '📸';
+    return '📄';
+  };
+
+  grid.innerHTML = contentLibrary.map(f => `
+    <div class="library-item">
+      <div class="library-icon">${typeIcon(f.name.toLowerCase())}</div>
+      <div class="library-info">
+        <div class="library-name">${f.name}</div>
+        <div class="library-meta">${(f.size/1024).toFixed(1)} KB · ${new Date(f.date).toLocaleDateString('id-ID')}</div>
+        <div class="library-active-badge" onclick="toggleLibraryFile(${f.id})" style="cursor:pointer;">
+          ${f.active ? '✅ Aktif' : '⏸️ Nonaktif'}
+        </div>
+      </div>
+      <button class="library-delete" onclick="deleteLibraryFile(${f.id})">✕</button>
+    </div>`).join('');
+}
+
+function updateLibraryStats() {
+  const active = contentLibrary.filter(f => f.active);
+  const totalChars = contentLibrary.reduce((sum, f) => sum + (f.content?.length || 0), 0);
+
+  const el = (id, val) => { const e = document.getElementById(id); if(e) e.textContent = val; };
+  el('lib-file-count', contentLibrary.length);
+  el('lib-char-count', totalChars > 1000 ? (totalChars/1000).toFixed(1)+'K' : totalChars);
+  el('lib-active-count', active.length);
+  el('sidebar-lib-count', `${active.length} file aktif`);
+}
+
+// Init library on load
+renderLibrary();
+updateLibraryStats();
+
+// Drag & drop
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('upload-zone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    const fakeEvent = { target: { files: e.dataTransfer.files } };
+    handleFileUpload(fakeEvent);
+  });
+});
+
+// ── Save voice ──
+function saveVoice() {
+  const style = document.getElementById('voice-style')?.value;
+  const values = document.getElementById('voice-values')?.value;
+  const refs = document.getElementById('voice-refs')?.value;
+  const examples = document.getElementById('voice-examples')?.value;
+  if (style) localStorage.setItem('voice_style', style);
+  if (values) localStorage.setItem('voice_values', values);
+  if (refs) localStorage.setItem('voice_refs', refs);
+  if (examples) localStorage.setItem('voice_examples', examples);
+  showToast('✅ Brand voice tersimpan!');
+}
+
+// ── Copy ──
+function copyContent(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy All'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+
+// ── Save to Google Sheet ──
+async function saveToSheet(btn, platform, topic, angle, data) {
+  btn.textContent = '⏳ Saving...';
+  btn.disabled = true;
+
+  // Extract best content per platform
+  let hook = '', fullContent = '', caption = '';
+  try {
+    if (platform === 'instagram') {
+      hook = data.hook_options?.[0] || '';
+      fullContent = data.slides?.map(s => `[${s.num}] ${s.title}: ${s.content}`).join('\n') || '';
+      caption = data.caption || '';
+    } else if (platform === 'tiktok') {
+      hook = data.hook_options?.[0] || '';
+      fullContent = `OPENING: ${data.script?.opening || ''}\n\nBODY: ${data.script?.body || ''}\n\nCLOSING: ${data.script?.closing || ''}`;
+      caption = data.caption || '';
+    } else if (platform === 'twitter') {
+      hook = data.hook_options?.[0] || '';
+      fullContent = data.tweets?.map(t => `[${t.num}] ${t.text}`).join('\n') || '';
+      caption = data.engagement_tweet || '';
+    }
+  } catch(e) {
+    fullContent = JSON.stringify(data);
+  }
+
+  try {
+    const res = await fetch('/api/sheets-append', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, platform, angle, hook, content: fullContent, caption })
+    });
+
+    if (!res.ok) throw new Error('Failed');
+
+    btn.textContent = '✅ Saved!';
+    btn.classList.add('saved');
+    showToast('✅ Tersimpan ke Google Sheet!');
+    setTimeout(() => {
+      btn.textContent = '📊 Save to Sheet';
+      btn.classList.remove('saved');
+      btn.disabled = false;
+    }, 3000);
+  } catch(err) {
+    btn.textContent = '❌ Gagal';
+    showToast('❌ Gagal simpan ke Sheet');
+    setTimeout(() => {
+      btn.textContent = '📊 Save to Sheet';
+      btn.disabled = false;
+    }, 2000);
+  }
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

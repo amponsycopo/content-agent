@@ -203,14 +203,14 @@ body {
 @keyframes slideUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
 
 .output-header {
-  padding: 14px 20px;
+  padding: 12px 20px;
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
-.output-platform { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
-.output-platform-icon { font-size: 18px; }
-.output-actions { display: flex; gap: 8px; }
+.output-platform { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.output-platform-icon { font-size: 16px; }
+.output-actions { display: flex; gap: 6px; }
 .action-btn {
   padding: 6px 14px; border-radius: 7px;
   background: var(--surface); border: 1px solid var(--border2);
@@ -220,50 +220,66 @@ body {
 .action-btn:hover { border-color: var(--accent); color: var(--accent); }
 .action-btn.copied { border-color: var(--green); color: var(--green); }
 
-.output-body { padding: 20px; }
-.output-section { margin-bottom: 20px; }
-.output-section:last-child { margin-bottom: 0; }
+.output-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.output-section { }
 .output-section-label {
-  font-size: 11px; font-weight: 700; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
 }
 .output-text {
-  font-size: 14px; color: var(--text2); line-height: 1.75;
+  font-size: 13px; color: var(--text2); line-height: 1.8;
   white-space: pre-wrap; background: var(--surface2);
   border-radius: 10px; padding: 14px 16px;
   border: 1px solid var(--border);
+  font-family: 'DM Sans', sans-serif;
 }
-.output-text strong { color: var(--text); }
+.output-text strong { color: var(--accent); font-weight: 700; }
 
 /* Slide preview */
 .slides-preview { display: flex; flex-direction: column; gap: 8px; }
 .slide-item {
   display: flex; align-items: flex-start; gap: 12px;
   background: var(--surface2); border-radius: 10px;
-  padding: 12px 14px; border: 1px solid var(--border);
+  padding: 13px 16px; border: 1px solid var(--border);
+  transition: border-color 0.15s;
 }
+.slide-item:hover { border-color: var(--border2); }
 .slide-num {
-  width: 28px; height: 28px; border-radius: 7px;
+  width: 26px; height: 26px; border-radius: 6px;
   background: var(--accent); color: #000;
-  font-size: 12px; font-weight: 800;
+  font-size: 11px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  flex-shrink: 0; margin-top: 1px;
 }
 .slide-content { flex: 1; }
-.slide-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-.slide-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+.slide-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.slide-desc { font-size: 12px; color: var(--text3); line-height: 1.6; }
 
 /* Hook preview */
 .hook-list { display: flex; flex-direction: column; gap: 6px; }
 .hook-item {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 14px; background: var(--surface2);
-  border-radius: 9px; border: 1px solid var(--border);
-  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px; background: var(--surface2);
+  border-radius: 10px; border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s; position: relative;
 }
-.hook-item:hover { border-color: var(--accent); }
-.hook-num { font-size: 11px; font-weight: 800; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
-.hook-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.hook-item:hover { border-color: var(--accent); background: rgba(232,255,71,0.04); }
+.hook-item:hover .hook-copy { opacity: 1; }
+.hook-num {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--accent); color: #000;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.hook-text { font-size: 13px; color: var(--text); line-height: 1.6; flex: 1; }
+.hook-copy {
+  opacity: 0; transition: opacity 0.15s;
+  font-size: 11px; color: var(--text3); cursor: pointer;
+  padding: 2px 8px; border-radius: 5px; background: var(--border2);
+  flex-shrink: 0; align-self: center;
+}
 
 /* Empty state */
 .empty-state {
@@ -617,7 +633,8 @@ function showPage(page) {
   const titles = {
     generate: ['⚡ Generate Konten', 'Masukkan topik, pilih platform, dan biarkan AI bekerja.'],
     history: ['📋 Riwayat Konten', 'Semua konten yang sudah lo generate.'],
-    voice: ['🎙️ Brand Voice', 'Atur gaya dan karakter konten lo.']
+    voice: ['🎙️ Brand Voice', 'Atur gaya dan karakter konten lo.'],
+    library: ['📚 Content Library', 'Upload referensi konten viral sebagai DNA brand voice lo.']
   };
   document.getElementById('page-title').textContent = titles[page][0];
   document.getElementById('page-sub').textContent = titles[page][1];
@@ -782,7 +799,9 @@ PENTING:
         parsed = null;
       }
 
-      renderOutputCard(card, platform, platformNames[platform], parsed, raw, topic, angle);
+      if (!window._cardData) window._cardData = {};
+  window._cardData[platform] = parsed || raw;
+  renderOutputCard(card, platform, platformNames[platform], parsed, raw, topic, angle);
 
       // Save to history
       history.unshift({ platform, topic, angle, content: parsed || raw, timestamp: new Date().toISOString() });
@@ -813,7 +832,10 @@ function renderOutputCard(card, platform, platformName, data, raw, topic, angle)
       bodyHtml += `<div class="output-section">
         <div class="output-section-label">🎣 Hook Options (pilih satu)</div>
         <div class="hook-list">
-          ${data.hook_options.map((h,i) => `<div class="hook-item"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span></div>`).join('')}
+          ${data.hook_options.map((h,i) => {
+        const escaped = h.replace(/\\/g,'\\\\').replace(/`/g,'\\`');
+        return `<div class="hook-item" onclick="copyHook(this, \`${escaped}\`)"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span><span class="hook-copy">copy</span></div>`;
+      }).join('')}
         </div>
       </div>`;
     }
@@ -845,7 +867,10 @@ function renderOutputCard(card, platform, platformName, data, raw, topic, angle)
       bodyHtml += `<div class="output-section">
         <div class="output-section-label">🎣 Hook Pembuka (pilih satu)</div>
         <div class="hook-list">
-          ${data.hook_options.map((h,i) => `<div class="hook-item"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span></div>`).join('')}
+          ${data.hook_options.map((h,i) => {
+        const escaped = h.replace(/\\/g,'\\\\').replace(/`/g,'\\`');
+        return `<div class="hook-item" onclick="copyHook(this, \`${escaped}\`)"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span><span class="hook-copy">copy</span></div>`;
+      }).join('')}
         </div>
       </div>`;
     }
@@ -875,7 +900,10 @@ ${data.script.closing || ''}
       bodyHtml += `<div class="output-section">
         <div class="output-section-label">🎣 Hook Tweet (pilih satu)</div>
         <div class="hook-list">
-          ${data.hook_options.map((h,i) => `<div class="hook-item"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span></div>`).join('')}
+          ${data.hook_options.map((h,i) => {
+        const escaped = h.replace(/\\/g,'\\\\').replace(/`/g,'\\`');
+        return `<div class="hook-item" onclick="copyHook(this, \`${escaped}\`)"><span class="hook-num">${i+1}</span><span class="hook-text">${h}</span><span class="hook-copy">copy</span></div>`;
+      }).join('')}
         </div>
       </div>`;
     }
@@ -911,7 +939,7 @@ ${data.script.closing || ''}
       </div>
       <div class="output-actions">
         <button class="action-btn" onclick="copyContent(this, \`${fullText.replace(/`/g,'\\`')}\`)">Copy All</button>
-        <button class="action-btn" onclick="saveToSheet(this, '${platform}', topic, angle, data)">📊 Save to Sheet</button>
+        <button class="action-btn" onclick="saveToSheet(this, '${platform}', '${topic}', '${angle}', _cardData['${platform}'])">📊 Save to Sheet</button>
       </div>
     </div>
     <div class="output-body">${bodyHtml}</div>`;
@@ -1141,6 +1169,14 @@ function copyContent(btn, text) {
   });
 }
 
+function copyHook(item, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const copyEl = item.querySelector('.hook-copy');
+    if (copyEl) { copyEl.textContent = '✅'; setTimeout(() => copyEl.textContent = 'copy', 1500); }
+    showToast('✅ Hook disalin!');
+  });
+}
+
 
 // ── Save to Google Sheet ──
 async function saveToSheet(btn, platform, topic, angle, data) {
@@ -1174,7 +1210,11 @@ async function saveToSheet(btn, platform, topic, angle, data) {
       body: JSON.stringify({ topic, platform, angle, hook, content: fullContent, caption })
     });
 
-    if (!res.ok) throw new Error('Failed');
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      if (res.status === 404) throw new Error('API belum di-deploy ke Vercel. Deploy dulu!');
+      throw new Error(errText || 'Gagal simpan');
+    }
 
     btn.textContent = '✅ Saved!';
     btn.classList.add('saved');

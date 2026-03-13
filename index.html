@@ -197,8 +197,9 @@ body {
 .output-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden;
+  border-radius: 14px; overflow: hidden;
   animation: slideUp 0.3s ease;
+  margin-bottom: 4px;
 }
 @keyframes slideUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
 
@@ -216,9 +217,12 @@ body {
   background: var(--surface); border: 1px solid var(--border2);
   color: var(--text2); font-size: 12px; font-weight: 600;
   cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
 }
 .action-btn:hover { border-color: var(--accent); color: var(--accent); }
 .action-btn.copied { border-color: var(--green); color: var(--green); }
+.action-btn.sheet-btn { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); color: var(--green); }
+.action-btn.sheet-btn:hover { background: rgba(34,197,94,0.15); border-color: var(--green); }
 
 .output-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 .output-section { }
@@ -664,6 +668,8 @@ async function generateContent() {
   if (selectedPlatforms.length === 0) { showToast('❗ Pilih minimal 1 platform!'); return; }
 
   isGenerating = true;
+  window._lastTopic = topic;
+  window._lastAngle = angle;
   const btn = document.getElementById('gen-btn');
   btn.disabled = true;
   document.getElementById('gen-icon').textContent = '⏳';
@@ -793,9 +799,19 @@ PENTING:
 
       let parsed;
       try {
-        const clean = raw.replace(/```json|```/g, '').trim();
+        // Try multiple cleanup strategies
+        let clean = raw.trim();
+        // Remove markdown code fences
+        clean = clean.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+        // Find JSON object boundaries if extra text exists
+        const jsonStart = clean.indexOf('{');
+        const jsonEnd = clean.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+          clean = clean.substring(jsonStart, jsonEnd + 1);
+        }
         parsed = JSON.parse(clean);
       } catch(e) {
+        console.warn('JSON parse failed:', e.message, '\nRaw:', raw.substring(0, 200));
         parsed = null;
       }
 
@@ -825,7 +841,11 @@ function renderOutputCard(card, platform, platformName, data, raw, topic, angle)
   let bodyHtml = '';
 
   if (!data) {
-    bodyHtml = `<div class="output-section"><div class="output-text">${raw}</div></div>`;
+    // Try to show something useful even if JSON failed
+    bodyHtml = `<div class="output-section">
+      <div class="output-section-label" style="color:var(--orange);">⚠️ Format gagal di-parse — raw output</div>
+      <div class="output-text" style="font-size:12px;max-height:300px;overflow-y:auto;">${raw.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    </div>`;
   } else if (platform === 'instagram') {
     // Hooks
     if (data.hook_options?.length) {
@@ -858,8 +878,11 @@ function renderOutputCard(card, platform, platformName, data, raw, topic, angle)
     // Caption
     if (data.caption) {
       bodyHtml += `<div class="output-section">
-        <div class="output-section-label">📝 Caption</div>
-        <div class="output-text">${data.caption}</div>
+        <div class="output-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>📝 Caption</span>
+          <button class="action-btn" style="padding:3px 10px;font-size:11px;" onclick="copyText(this, \\`${(data.caption||'').replace(/\\/g,'\\\\').replace(/`/g,'\\`')}\\`)">Copy</button>
+        </div>
+        <div class="output-text">${(data.caption||'').replace(/\n/g,'<br>')}</div>
       </div>`;
     }
   } else if (platform === 'tiktok') {
@@ -938,8 +961,8 @@ ${data.script.closing || ''}
         ${platformName}
       </div>
       <div class="output-actions">
-        <button class="action-btn" onclick="copyContent(this, \`${fullText.replace(/`/g,'\\`')}\`)">Copy All</button>
-        <button class="action-btn" onclick="saveToSheet(this, '${platform}', '${topic}', '${angle}', _cardData['${platform}'])">📊 Save to Sheet</button>
+        <button class="action-btn" onclick="copyContent(this, \`${fullText.replace(/`/g,'\\`')}\`)">📋 Copy Semua</button>
+        <button class="action-btn sheet-btn" onclick="saveToSheet(this, '${platform}', window._lastTopic||'', window._lastAngle||'', window._cardData&&window._cardData['${platform}'])">📊 Simpan ke Sheet</button>
       </div>
     </div>
     <div class="output-body">${bodyHtml}</div>`;
@@ -1165,7 +1188,7 @@ function copyContent(btn, text) {
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = '✅ Copied!';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy All'; btn.classList.remove('copied'); }, 2000);
+    setTimeout(() => { btn.textContent = '📋 Copy Semua'; btn.classList.remove('copied'); }, 2000);
   });
 }
 
@@ -1177,6 +1200,15 @@ function copyHook(item, text) {
   });
 }
 
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅';
+    setTimeout(() => btn.textContent = orig, 1500);
+    showToast('✅ Disalin!');
+  });
+}
+
 
 // ── Save to Google Sheet ──
 async function saveToSheet(btn, platform, topic, angle, data) {
@@ -1185,21 +1217,31 @@ async function saveToSheet(btn, platform, topic, angle, data) {
 
   // Extract best content per platform
   let hook = '', fullContent = '', caption = '';
+  
+  if (!data || typeof data !== 'object') {
+    showToast('❌ Data konten tidak tersedia. Generate ulang dulu.');
+    btn.textContent = '📊 Save to Sheet';
+    btn.disabled = false;
+    return;
+  }
+
   try {
     if (platform === 'instagram') {
-      hook = data.hook_options?.[0] || '';
-      fullContent = data.slides?.map(s => `[${s.num}] ${s.title}: ${s.content}`).join('\n') || '';
+      hook = (data.hook_options || [])[0] || '';
+      fullContent = (data.slides || []).map(s => `[Slide ${s.num}] ${s.title}\n${s.content}`).join('\n\n') || '';
       caption = data.caption || '';
     } else if (platform === 'tiktok') {
-      hook = data.hook_options?.[0] || '';
-      fullContent = `OPENING: ${data.script?.opening || ''}\n\nBODY: ${data.script?.body || ''}\n\nCLOSING: ${data.script?.closing || ''}`;
+      hook = (data.hook_options || [])[0] || '';
+      const sc = data.script || {};
+      fullContent = `OPENING:\n${sc.opening || ''}\n\nBODY:\n${sc.body || ''}\n\nCLOSING:\n${sc.closing || ''}`;
       caption = data.caption || '';
     } else if (platform === 'twitter') {
-      hook = data.hook_options?.[0] || '';
-      fullContent = data.tweets?.map(t => `[${t.num}] ${t.text}`).join('\n') || '';
+      hook = (data.hook_options || [])[0] || '';
+      fullContent = (data.tweets || []).map(t => `[${t.num}] ${t.text}`).join('\n\n') || '';
       caption = data.engagement_tweet || '';
     }
   } catch(e) {
+    console.error('Extract error:', e);
     fullContent = JSON.stringify(data);
   }
 

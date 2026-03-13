@@ -408,7 +408,7 @@ body {
 
     <div class="voice-card" style="margin-top:8px;">
       <div class="voice-card-title">Content Library</div>
-      <div id="sidebar-lib-count" style="font-size:13px;color:#ccc;">0 file dimuat</div>
+      <div id="sidebar-lib-count" style="font-size:13px;color:#ccc;">0 file aktif</div>
       <div style="font-size:11px;color:var(--text3);margin-top:4px;">Dipakai sebagai referensi tiap generate</div>
     </div>
 
@@ -597,13 +597,13 @@ let selectedPlatforms = ['instagram','tiktok','twitter'];
 let isGenerating = false;
 
 // Brand voice (editable di settings)
-function getVoice() {
+function getVoice(topic = '', angle = '') {
   return {
     style: document.getElementById('voice-style')?.value || localStorage.getItem('voice_style') || 'Santai kayak ngobrol sama temen. Jujur, langsung ke intinya.',
     values: document.getElementById('voice-values')?.value || localStorage.getItem('voice_values') || 'Data-driven, anti bullshit, growth mindset.',
     refs: document.getElementById('voice-refs')?.value || localStorage.getItem('voice_refs') || 'Alex Hormozi, Fery Irwandi, Raymond Chin',
     examples: document.getElementById('voice-examples')?.value || localStorage.getItem('voice_examples') || '',
-    library: getLibraryContext()
+    library: getLibraryContext(topic, angle)
   };
 }
 
@@ -656,7 +656,26 @@ async function generateContent() {
   const outputArea = document.getElementById('output-area');
   outputArea.innerHTML = '';
 
-  const voice = getVoice();
+  // Show which library files will be used
+  const activeLibFiles = contentLibrary.filter(f => f.active);
+  if (activeLibFiles.length > 0) {
+    const qwords = (topic + ' ' + angle).toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const scored = activeLibFiles.map(f => {
+      const ft = (f.name + ' ' + f.content).toLowerCase();
+      const score = qwords.reduce((s, w) => s + (ft.match(new RegExp(w, 'g')) || []).length, 0);
+      return { name: f.name, score };
+    }).sort((a, b) => b.score - a.score).slice(0, 3);
+
+    const tags = scored.map(f =>
+      `<span style="background:rgba(232,255,71,0.1);color:var(--accent);border:1px solid rgba(232,255,71,0.2);padding:2px 9px;border-radius:5px;font-size:11px;font-weight:600;">${f.name}</span>`
+    ).join(' ');
+    const notice = document.createElement('div');
+    notice.style.cssText = 'padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;';
+    notice.innerHTML = '📚 Library relevan yang dipakai: ' + tags;
+    outputArea.appendChild(notice);
+  }
+
+  const voice = getVoice(topic, angle);
   const angleLabels = {
     pain: 'Pain Point — bikin orang relate dan sakit duluan sebelum dikasih solusi',
     data: 'Data Driven — pakai angka, statistik, dan fakta konkret',
@@ -976,12 +995,67 @@ function toggleLibraryFile(id) {
   }
 }
 
-function getLibraryContext() {
+function getLibraryContext(topic = '', angle = '') {
   const activeFiles = contentLibrary.filter(f => f.active);
   if (!activeFiles.length) return '';
-  const combined = activeFiles.map(f => `=== ${f.name} ===\n${f.content}`).join('\n\n');
-  // Limit to 8000 chars biar ga overflow context
-  return combined.length > 8000 ? combined.substring(0, 8000) + '\n[...dipotong karena terlalu panjang]' : combined;
+
+  // Score each file by relevance to topic + angle
+  const query = (topic + ' ' + angle).toLowerCase();
+  const queryWords = query.split(/\s+/).filter(w => w.length > 2);
+
+  const angleKeywords = {
+    pain: ['pain', 'masalah', 'struggle', 'problem', 'susah', 'gagal', 'rugi'],
+    data: ['data', 'angka', 'statistik', 'riset', 'fakta', 'persen', 'juta'],
+    macro: ['ekonomi', 'makro', 'rupiah', 'inflasi', 'global', 'geopolitik', 'pasar'],
+    story: ['cerita', 'story', 'pengalaman', 'kisah', 'awal', 'akhir'],
+    contrarian: ['tapi', 'salah', 'mitos', 'beneran', 'faktanya', 'ternyata'],
+    howto: ['cara', 'langkah', 'step', 'gimana', 'tips', 'strategi']
+  };
+
+  const scored = activeFiles.map(file => {
+    const fileText = (file.name + ' ' + file.content).toLowerCase();
+    let score = 0;
+
+    // Score by topic words match
+    queryWords.forEach(word => {
+      const count = (fileText.match(new RegExp(word, 'g')) || []).length;
+      score += Math.min(count, 10); // cap per word
+    });
+
+    // Bonus: angle keyword match
+    const angleWords = angleKeywords[angle] || [];
+    angleWords.forEach(word => {
+      if (fileText.includes(word)) score += 3;
+    });
+
+    // Bonus: file name match
+    queryWords.forEach(word => {
+      if (file.name.toLowerCase().includes(word)) score += 5;
+    });
+
+    return { ...file, score };
+  });
+
+  // Sort by relevance, take top 3
+  scored.sort((a, b) => b.score - a.score);
+  const top3 = scored.slice(0, 3);
+
+  // Log ke console buat debugging
+  console.log('[Library] Relevance scores:', scored.map(f => `${f.name}: ${f.score}`));
+  console.log('[Library] Selected:', top3.map(f => f.name));
+
+  // Build context, max 4000 char per file, total max 10000
+  let result = '';
+  for (const file of top3) {
+    const excerpt = file.content.length > 4000
+      ? file.content.substring(0, 4000) + '\n[...dipotong]'
+      : file.content;
+    const block = `=== ${file.name} (relevance: ${file.score}) ===\n${excerpt}\n`;
+    if ((result + block).length > 10000) break;
+    result += block + '\n';
+  }
+
+  return result;
 }
 
 function renderLibrary() {

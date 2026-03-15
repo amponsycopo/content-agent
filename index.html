@@ -1084,7 +1084,7 @@ function renderOutputCard(card, platform, platformName, data, raw, topic, angle)
       bodyHtml += `<div class="output-section">
         <div class="output-section-label" style="display:flex;justify-content:space-between;align-items:center;">
           <span>📝 Caption</span>
-          <button class="action-btn" style="padding:3px 10px;font-size:11px;" onclick="copyText(this, \\`${(data.caption||'').replace(/\\/g,'\\\\').replace(/`/g,'\\`')}\\`)">Copy</button>
+          <button class="action-btn" style="padding:3px 10px;font-size:11px;" onclick="copyCaption(this, 'instagram')">Copy</button>
         </div>
         <div class="output-text">${(data.caption||'').replace(/\n/g,'<br>')}</div>
       </div>`;
@@ -1413,6 +1413,19 @@ function copyText(btn, text) {
   });
 }
 
+
+// ── Copy Caption helper ──
+function copyCaption(btn, platform) {
+  const data = window._cardData && window._cardData[platform];
+  const text = (data && data.caption) ? data.caption : '';
+  if (!text) { showToast('Tidak ada caption'); return; }
+  navigator.clipboard.writeText(text).then(function() {
+    const orig = btn.textContent;
+    btn.textContent = '✅';
+    setTimeout(function() { btn.textContent = orig; }, 1500);
+    showToast('✅ Caption disalin!');
+  });
+}
 
 // ── Save to Google Sheet ──
 async function saveToSheet(btn, platform, topic, angle, data) {

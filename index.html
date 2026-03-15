@@ -382,9 +382,202 @@ body {
 /* Page sections */
 .page-section { display: none; }
 .page-section.active { display: block; }
+
+/* ── Carousel Modal ── */
+.carousel-modal {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+.carousel-modal-inner {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  width: 100%; max-width: 940px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.carousel-modal-header { display: flex; justify-content: space-between; align-items: center; }
+.carousel-modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); }
+.carousel-close-btn {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 6px 14px;
+  color: var(--text2); font-size: 13px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.carousel-close-btn:hover { border-color: var(--red); color: var(--red); }
+.carousel-slides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.carousel-slide-preview {
+  position: relative; border-radius: 12px; overflow: hidden;
+  border: 2px solid var(--border); transition: border-color 0.15s; cursor: pointer;
+}
+.carousel-slide-preview:hover { border-color: var(--accent); }
+.carousel-slide-preview canvas { display: block; width: 100%; height: auto; }
+.carousel-slide-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(0,0,0,0.75); color: var(--accent);
+  font-size: 10px; font-weight: 800;
+  padding: 2px 8px; border-radius: 5px;
+  font-family: 'Syne', sans-serif;
+}
+.carousel-theme-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.theme-chip {
+  padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border2);
+  background: transparent; color: var(--text2);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.theme-chip.active { border-color: var(--accent); background: rgba(232,255,71,0.08); color: var(--accent); }
+.carousel-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.carousel-dl-btn {
+  padding: 12px 24px; border-radius: 10px;
+  background: var(--accent); color: #000;
+  border: none; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.carousel-dl-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+.carousel-dl-btn.secondary {
+  background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border2);
+}
+.carousel-dl-btn.secondary:hover { border-color: var(--accent); color: var(--accent); transform: none; }
+.carousel-control-label { font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — Mobile & Tablet
+   ═══════════════════════════════════════════ */
+
+/* ── Hamburger button (mobile only) ── */
+.hamburger {
+  display: none;
+  position: fixed; top: 14px; left: 16px; z-index: 200;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 8px 10px;
+  cursor: pointer; font-size: 18px; line-height: 1;
+  color: var(--text);
+}
+
+/* ── Overlay backdrop ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.active { display: block; }
+
+@media (max-width: 768px) {
+
+  /* Show hamburger */
+  .hamburger { display: flex; align-items: center; justify-content: center; }
+
+  /* Sidebar: hidden off-screen by default, slides in */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    z-index: 160;
+    width: 280px;
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  /* Main takes full width */
+  .main {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Topbar: add left padding for hamburger */
+  .topbar {
+    padding: 0 16px 0 60px;
+    height: 52px;
+  }
+  .page-title { font-size: 13px; }
+  .page-sub { display: none; }
+  .credits-pill { font-size: 11px; padding: 5px 10px; }
+
+  /* Content padding */
+  .content { padding: 16px; }
+
+  /* Form grid: single column */
+  .form-row { grid-template-columns: 1fr !important; gap: 10px; }
+  .form-group.full { grid-column: 1 !important; }
+
+  /* Platform buttons wrap */
+  .platform-grid { gap: 6px; }
+  .platform-btn { padding: 7px 12px; font-size: 12px; }
+
+  /* Output card actions: stack on small screens */
+  .output-header { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+  .output-actions { flex-wrap: wrap; gap: 6px; }
+  .action-btn { font-size: 11px; padding: 5px 10px; }
+  .output-body { padding: 14px 16px; }
+
+  /* Library grid: single column */
+  .library-grid { grid-template-columns: 1fr !important; }
+
+  /* Library stats: wrap */
+  .library-stats { flex-wrap: wrap; gap: 10px; }
+
+  /* Carousel modal */
+  .carousel-modal { padding: 12px; }
+  .carousel-modal-inner { padding: 18px; gap: 14px; border-radius: 16px; }
+  .carousel-modal-title { font-size: 15px; }
+  .carousel-slides-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .carousel-actions { flex-direction: column; }
+  .carousel-dl-btn { width: 100%; justify-content: center; }
+
+  /* Tabs */
+  .tabs { width: 100%; overflow-x: auto; }
+  .tab { white-space: nowrap; padding: 7px 14px; font-size: 12px; }
+
+  /* Input panel */
+  .input-panel { padding: 16px; }
+  .panel-title { font-size: 14px; }
+
+  /* Hook list items */
+  .hook-item { padding: 10px 12px; }
+  .hook-text { font-size: 12px; }
+
+  /* Slide preview items */
+  .slide-item { padding: 10px 12px; }
+  .slide-title { font-size: 12px; }
+  .slide-desc { font-size: 11px; }
+
+  /* Empty state */
+  .empty-state { padding: 48px 24px; }
+  .empty-title { font-size: 15px; }
+
+  /* Voice card in sidebar — keep compact */
+  .voice-card { margin: 8px 14px; padding: 12px; }
+
+  /* Generate button */
+  .generate-btn { font-size: 13px; padding: 12px; }
+}
+
+@media (max-width: 400px) {
+  .carousel-slides-grid { grid-template-columns: 1fr !important; }
+  .platform-btn { padding: 6px 10px; font-size: 11px; }
+  .topbar { padding: 0 12px 0 56px; }
+}
 </style>
 </head>
 <body>
+
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <div class="app">
 
@@ -875,6 +1068,17 @@ function renderOutputCard(card, platform, platformName, data, raw, topic, angle)
         </div>
       </div>`;
     }
+    // Carousel PNG button
+    if (data.slides?.length) {
+      bodyHtml += `<div style="margin-top:4px;">
+        <button class="action-btn carousel-gen-btn"
+          style="background:rgba(232,255,71,0.08);border-color:rgba(232,255,71,0.3);color:var(--accent);padding:10px 20px;font-size:13px;font-weight:700;width:100%;"
+          onclick="openCarouselGenerator(window._cardData && window._cardData['instagram'])">
+          🖼️ Generate PNG Carousel — Siap Upload
+        </button>
+      </div>`;
+    }
+
     // Caption
     if (data.caption) {
       bodyHtml += `<div class="output-section">
@@ -1274,6 +1478,256 @@ async function saveToSheet(btn, platform, topic, angle, data) {
       btn.disabled = false;
     }, 2000);
   }
+}
+
+
+
+// ── Mobile Sidebar ──
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+}
+
+// Close sidebar when nav item clicked on mobile
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+});
+
+// ── CAROUSEL GENERATOR ──────────────────────────────────────────
+
+const CAROUSEL_THEMES = {
+  dark:  { name: 'Dark Accent', bg: '#0a0a0a', card: '#111111', accent: '#e8ff47', text: '#f0f0f0', subtext: '#888888', border: '#222222', numBg: '#e8ff47', numText: '#000000' },
+  light: { name: 'Light Clean', bg: '#f5f5f0', card: '#ffffff', accent: '#111111', text: '#111111', subtext: '#666666', border: '#e0e0e0', numBg: '#111111', numText: '#ffffff' },
+  bold:  { name: 'Bold Orange', bg: '#0f0a00', card: '#1a1000', accent: '#ff6b00', text: '#fff8f0', subtext: '#997755', border: '#2a1a00', numBg: '#ff6b00', numText: '#ffffff' },
+  navy:  { name: 'Navy Pro', bg: '#050d1a', card: '#0a1628', accent: '#4da6ff', text: '#e8f4ff', subtext: '#6699bb', border: '#112233', numBg: '#4da6ff', numText: '#000000' },
+};
+
+let _carouselData = null;
+let _currentTheme = 'dark';
+let _canvases = [];
+
+function openCarouselGenerator(data) {
+  if (!data || !data.slides || !data.slides.length) { showToast('❗ Generate Instagram dulu!'); return; }
+  _carouselData = data;
+  _currentTheme = 'dark';
+
+  const modal = document.createElement('div');
+  modal.className = 'carousel-modal';
+  modal.id = 'carousel-modal';
+
+  const themes = Object.entries(CAROUSEL_THEMES).map(([key, t]) =>
+    '<button class="theme-chip ' + (key === 'dark' ? 'active' : '') + '" onclick="setCarouselTheme(\'' + key + '\', this)">' + t.name + '</button>'
+  ).join('');
+
+  modal.innerHTML = '<div class="carousel-modal-inner">' +
+    '<div class="carousel-modal-header">' +
+      '<div class="carousel-modal-title">🖼️ Carousel PNG Generator</div>' +
+      '<button class="carousel-close-btn" onclick="closeCarouselModal()">✕ Tutup</button>' +
+    '</div>' +
+    '<div><div class="carousel-control-label">Pilih Tema</div>' +
+    '<div class="carousel-theme-row" id="theme-chips">' + themes + '</div></div>' +
+    '<div id="carousel-slides-grid" class="carousel-slides-grid"></div>' +
+    '<div class="carousel-actions">' +
+      '<button class="carousel-dl-btn" onclick="downloadAllSlides(false)">⬇️ Download Semua (ZIP)</button>' +
+      '<button class="carousel-dl-btn secondary" onclick="downloadAllSlides(true)">⬇️ Satu per Satu</button>' +
+    '</div>' +
+    '<div style="font-size:12px;color:var(--text3);line-height:1.6;">💡 Klik slide untuk download 1 file. Ukuran: <strong style="color:var(--text2);">1080×1080px</strong> siap upload Instagram.</div>' +
+    '</div>';
+
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeCarouselModal(); });
+  renderAllCarouselSlides();
+}
+
+function closeCarouselModal() {
+  const m = document.getElementById('carousel-modal');
+  if (m) m.remove();
+  _canvases = [];
+}
+
+function setCarouselTheme(key, btn) {
+  _currentTheme = key;
+  document.querySelectorAll('.theme-chip').forEach(function(c) { c.classList.remove('active'); });
+  btn.classList.add('active');
+  renderAllCarouselSlides();
+}
+
+function renderAllCarouselSlides() {
+  const grid = document.getElementById('carousel-slides-grid');
+  if (!grid || !_carouselData) return;
+  const slides = _carouselData.slides || [];
+  _canvases = [];
+  grid.innerHTML = '';
+
+  slides.forEach(function(slide, idx) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'carousel-slide-preview';
+
+    const badge = document.createElement('div');
+    badge.className = 'carousel-slide-badge';
+    badge.textContent = 'Slide ' + (slide.num || idx + 1);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080; canvas.height = 1080;
+    drawSlide(canvas, slide, idx, slides.length);
+    _canvases.push({ canvas: canvas, slide: slide });
+    canvas.addEventListener('click', (function(c, s) { return function() { downloadSingleSlide(c, s.num || 1); }; })(canvas, slide));
+
+    wrapper.appendChild(canvas);
+    wrapper.appendChild(badge);
+    grid.appendChild(wrapper);
+  });
+}
+
+function drawSlide(canvas, slide, idx, total) {
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1080;
+  const theme = CAROUSEL_THEMES[_currentTheme];
+
+  ctx.fillStyle = theme.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = theme.border;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.35;
+  for (let x = 0; x <= W; x += 80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y <= H; y += 80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+
+  const m = 55;
+  ctx.fillStyle = theme.card;
+  drawRoundRect(ctx, m, m, W-m*2, H-m*2, 30);
+  ctx.fill();
+
+  ctx.fillStyle = theme.accent;
+  drawRoundRect(ctx, m, m, W-m*2, 10, {tl:30,tr:30,br:0,bl:0});
+  ctx.fill();
+
+  const px = m + 64;
+  const pw = W - (m+64)*2;
+  const ny = m + 62;
+
+  ctx.fillStyle = theme.numBg;
+  drawRoundRect(ctx, px, ny, 80, 38, 10);
+  ctx.fill();
+  ctx.fillStyle = theme.numText;
+  ctx.font = 'bold 17px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText((slide.num || idx+1) + ' / ' + total, px+40, ny+26);
+  ctx.textAlign = 'left';
+
+  const tSize = slide.title.length > 45 ? 50 : slide.title.length > 28 ? 58 : 66;
+  ctx.fillStyle = theme.text;
+  ctx.font = 'bold ' + tSize + 'px system-ui, sans-serif';
+  const tY = ny + 88;
+  const tH = wrapCanvasText(ctx, slide.title, px, tY, pw, tSize * 1.28);
+
+  const divY = tY + tH + 18;
+  ctx.fillStyle = theme.accent;
+  ctx.fillRect(px, divY, 64, 5);
+
+  ctx.fillStyle = theme.subtext;
+  ctx.font = '400 30px system-ui, sans-serif';
+  wrapCanvasText(ctx, slide.content, px, divY + 44, pw, 46);
+
+  const barY = H - m - 78;
+  ctx.strokeStyle = theme.border;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath(); ctx.moveTo(px, barY); ctx.lineTo(px+pw, barY); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = theme.accent;
+  ctx.font = 'bold 22px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('@erlan', px, barY+38);
+
+  if (idx < total - 1) {
+    ctx.fillStyle = theme.subtext;
+    ctx.font = '400 20px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('swipe →', px+pw, barY+38);
+  }
+  ctx.textAlign = 'left';
+}
+
+function drawRoundRect(ctx, x, y, w, h, r) {
+  if (typeof r === 'number') r = {tl:r,tr:r,br:r,bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x+r.tl, y);
+  ctx.lineTo(x+w-r.tr, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r.tr);
+  ctx.lineTo(x+w, y+h-r.br); ctx.quadraticCurveTo(x+w, y+h, x+w-r.br, y+h);
+  ctx.lineTo(x+r.bl, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r.bl);
+  ctx.lineTo(x, y+r.tl); ctx.quadraticCurveTo(x, y, x+r.tl, y);
+  ctx.closePath();
+}
+
+function wrapCanvasText(ctx, text, x, y, maxW, lineH) {
+  const words = text.split(' ');
+  let line = '', curY = y;
+  for (let i = 0; i < words.length; i++) {
+    const test = line ? line + ' ' + words[i] : words[i];
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, x, curY);
+      line = words[i]; curY += lineH;
+      if (curY > 980) { ctx.fillText(line+'...', x, curY); return curY - y; }
+    } else { line = test; }
+  }
+  if (line) ctx.fillText(line, x, curY);
+  return curY - y + lineH;
+}
+
+function downloadSingleSlide(canvas, num) {
+  const a = document.createElement('a');
+  a.download = 'slide-' + String(num).padStart(2,'0') + '.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  showToast('✅ Slide ' + num + ' didownload!');
+}
+
+async function downloadAllSlides(oneByOne) {
+  if (!_canvases.length) return;
+  if (oneByOne) {
+    for (let i = 0; i < _canvases.length; i++) {
+      downloadSingleSlide(_canvases[i].canvas, _canvases[i].slide.num || i+1);
+      await new Promise(function(r) { setTimeout(r, 350); });
+    }
+    showToast('✅ Semua slide didownload!');
+    return;
+  }
+  if (typeof JSZip === 'undefined') {
+    await new Promise(function(res, rej) {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  const zip = new JSZip();
+  const folder = zip.folder('carousel-slides');
+  for (let i = 0; i < _canvases.length; i++) {
+    const b64 = _canvases[i].canvas.toDataURL('image/png').split(',')[1];
+    folder.file('slide-' + String(_canvases[i].slide.num || i+1).padStart(2,'0') + '.png', b64, {base64:true});
+  }
+  const blob = await zip.generateAsync({type:'blob'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'carousel-slides.zip'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ ZIP berhasil didownload!');
 }
 
 // ── Toast ──

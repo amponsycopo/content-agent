@@ -14,15 +14,7 @@ export default async function handler(req, res) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'API key not configured' });
 
-  const SYSTEM = `Kamu adalah konsultan transformasi digital senior spesialis implementasi AI untuk bisnis Indonesia.
-
-INSTRUKSI PENTING:
-- Output HANYA berupa JSON valid, tidak ada teks lain SAMA SEKALI
-- Jangan tambahkan kalimat pembuka, penutup, atau penjelasan apapun
-- Jangan gunakan markdown code fence (backtick)
-- Langsung mulai dengan karakter { dan akhiri dengan }
-- Semua estimasi harus realistis untuk konteks bisnis Indonesia
-- Gunakan bahasa Indonesia yang formal dan profesional`;
+  const SYSTEM = `Kamu adalah konsultan AI untuk bisnis Indonesia. Output HANYA JSON valid. Mulai langsung dengan { tanpa apapun sebelumnya. Akhiri dengan } tanpa apapun sesudahnya. JANGAN gunakan markdown. Batasi nilai string maksimal 120 karakter agar JSON tidak terpotong. Estimasi harus realistis dan dalam Bahasa Indonesia formal.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -34,7 +26,7 @@ INSTRUKSI PENTING:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2500,
+        max_tokens: 4000,
         system: SYSTEM,
         messages: [{ role: 'user', content: prompt }]
       })

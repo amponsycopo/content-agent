@@ -753,17 +753,53 @@ function prevQ() {
 }
 
 // ── REPORT GENERATION ──────────────────────────────────────────
-async function generateReport() {
+async async function generateReport() {
   showPhase('analyzing');
 
   const prompt = buildPrompt();
 
   try {
     const raw = await callClaude(prompt);
-    const clean = raw.replace(/```json\s*/i, '').replace(/```/g, '').trim();
-    const report = JSON.parse(clean);
-    renderReport(report);
-    saveToSheets(report);
+
+    // Robust JSON extraction — handle semua variasi output Claude
+    let report = null;
+    try {
+      // Strategy 1: clean markdown fences dulu
+      let clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+      // Strategy 2: extract JSON object dari dalam text
+      const jsonMatch = clean.match(/\{[\s\S]*\}/);
+      if (jsonMatch) clean = jsonMatch[0];
+
+      report = JSON.parse(clean);
+    } catch(parseErr) {
+      console.error('JSON parse failed:', parseErr.message);
+      console.error('Raw response:', raw.substring(0, 500));
+      report = null;
+    }
+
+    if (report && report.score) {
+      renderReport(report);
+      saveToSheets(report);
+    } else {
+      // Kalau parse gagal, coba sekali lagi dengan prompt yang lebih strict
+      console.log('Retrying with strict JSON prompt...');
+      try {
+        const retryPrompt = prompt + '\n\nPENTING: Output HANYA JSON murni, dimulai dengan { dan diakhiri dengan }. Tidak ada teks apapun sebelum atau sesudah JSON.';
+        const raw2 = await callClaude(retryPrompt);
+        const jsonMatch2 = raw2.match(/\{[\s\S]*\}/);
+        const report2 = jsonMatch2 ? JSON.parse(jsonMatch2[0]) : null;
+        if (report2 && report2.score) {
+          renderReport(report2);
+          saveToSheets(report2);
+          return;
+        }
+      } catch(e2) {
+        console.error('Retry also failed:', e2.message);
+      }
+      renderReport(fallbackReport());
+      saveToSheets(fallbackReport());
+    }
   } catch(e) {
     console.error('Report error:', e);
     renderReport(fallbackReport());

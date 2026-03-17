@@ -661,6 +661,105 @@ footer {
 /* Make portfolio cards clickable */
 .portfolio-card { cursor: pointer; }
 
+
+/* ── Exit Intent Popup ── */
+.popup-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.popup-overlay.show {
+  opacity: 1; pointer-events: all;
+}
+.popup-box {
+  background: #fff; border-radius: 24px;
+  width: 100%; max-width: 520px;
+  padding: 40px 36px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.2);
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.3s ease;
+}
+.popup-overlay.show .popup-box {
+  transform: translateY(0) scale(1);
+}
+.popup-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  font-size: 16px; cursor: pointer; color: var(--text3);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.popup-close:hover { background: #fee2e2; color: #dc2626; }
+.popup-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--blue-light); border: 1px solid rgba(26,86,219,0.2);
+  border-radius: 99px; padding: 5px 14px;
+  font-size: 12px; font-weight: 700; color: var(--blue);
+  margin-bottom: 20px;
+}
+.popup-badge-dot {
+  width: 6px; height: 6px; background: var(--blue);
+  border-radius: 50%; animation: pulse 2s infinite;
+}
+.popup-title {
+  font-size: clamp(20px, 4vw, 28px);
+  font-weight: 800; color: var(--text);
+  line-height: 1.25; letter-spacing: -0.8px;
+  margin-bottom: 12px;
+}
+.popup-title span { color: var(--blue); }
+.popup-sub {
+  font-size: 15px; color: var(--text3);
+  line-height: 1.75; margin-bottom: 28px;
+}
+.popup-stats {
+  display: flex; justify-content: center; gap: 24px;
+  margin-bottom: 28px; flex-wrap: wrap;
+}
+.popup-stat { text-align: center; }
+.popup-stat-num {
+  font-size: 28px; font-weight: 900;
+  color: var(--blue); letter-spacing: -1px; line-height: 1;
+}
+.popup-stat-label {
+  font-size: 11px; color: var(--text3);
+  font-weight: 600; margin-top: 4px;
+}
+.popup-divider {
+  width: 1px; background: var(--border);
+  align-self: stretch;
+}
+.popup-cta {
+  display: block; width: 100%; padding: 15px;
+  background: linear-gradient(135deg, var(--blue), #3b82f6);
+  border: none; border-radius: 12px; color: #fff;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+  font-family: inherit; letter-spacing: -0.3px;
+  text-decoration: none; text-align: center;
+  box-shadow: 0 8px 24px rgba(26,86,219,0.28);
+  transition: transform 0.15s;
+  margin-bottom: 12px;
+}
+.popup-cta:hover { transform: translateY(-1px); }
+.popup-skip {
+  background: none; border: none;
+  font-size: 13px; color: var(--text4);
+  cursor: pointer; font-family: inherit;
+  transition: color 0.15s;
+}
+.popup-skip:hover { color: var(--text3); }
+@media (max-width: 480px) {
+  .popup-box { padding: 32px 24px; }
+  .popup-stats { gap: 16px; }
+}
+
 </style>
 </head>
 <body>
@@ -974,7 +1073,7 @@ footer {
       <div class="pricing-card featured fade-in">
         <div class="pricing-badge">⭐ Paling Populer</div>
         <div class="pricing-name">Growth</div>
-        <div class="pricing-price">Rp 8,5jt <span>/ setup</span></div>
+        <div class="pricing-price">Rp 8,5Jt <span></div>
         <div class="pricing-retainer">+ Rp 750rb / bulan maintenance</div>
         <ul class="pricing-features">
           <li><span class="pricing-check">✓</span>2 AI Tools custom — serang 2 bottleneck sekaligus</li>
@@ -1319,6 +1418,53 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
+
+// ── Popup Logic ──
+(function() {
+  const POPUP_KEY = 'integrate_popup_shown';
+  let popupShown = false;
+
+  function showPopup() {
+    if (popupShown || sessionStorage.getItem(POPUP_KEY)) return;
+    popupShown = true;
+    sessionStorage.setItem(POPUP_KEY, '1');
+    const overlay = document.getElementById('popup-overlay');
+    if (overlay) overlay.classList.add('show');
+  }
+
+  function closePopup() {
+    const overlay = document.getElementById('popup-overlay');
+    if (overlay) overlay.classList.remove('show');
+  }
+
+  function handlePopupBg(e) {
+    if (e.target === document.getElementById('popup-overlay')) closePopup();
+  }
+
+  // Make functions global
+  window.closePopup = closePopup;
+  window.handlePopupBg = handlePopupBg;
+
+  // Trigger 1: Exit intent (mouse leaves window upward)
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY <= 10) showPopup();
+  });
+
+  // Trigger 2: Time-based (5 detik di halaman)
+  setTimeout(showPopup, 5000);
+
+  // Trigger 3: Scroll 30% halaman
+  window.addEventListener('scroll', function() {
+    const scrollPct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+    if (scrollPct >= 30) showPopup();
+  }, { passive: true });
+
+  // ESC key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePopup();
+  });
+})();
+
 </script>
 
 
@@ -1351,6 +1497,54 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
         </a>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- Popup Lead Magnet -->
+<div class="popup-overlay" id="popup-overlay" onclick="handlePopupBg(event)">
+  <div class="popup-box" id="popup-box">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+
+    <div class="popup-badge">
+      <span class="popup-badge-dot"></span>
+      Cek Gratis — 5 Menit
+    </div>
+
+    <h2 class="popup-title">
+      Berapa Besar <span>Profit Margin</span><br>
+      yang Bisa Anda Raih<br>
+      dengan Integrasi AI?
+    </h2>
+
+    <p class="popup-sub">
+      Jawab 20 pertanyaan singkat tentang operasional bisnis Anda.<br>
+      AI kami kalkulasi potensi penghematan dan peningkatan profit secara spesifik.
+    </p>
+
+    <div class="popup-stats">
+      <div class="popup-stat">
+        <div class="popup-stat-num">60%</div>
+        <div class="popup-stat-label">Rata-rata peningkatan<br>produktivitas</div>
+      </div>
+      <div class="popup-divider"></div>
+      <div class="popup-stat">
+        <div class="popup-stat-num">30%</div>
+        <div class="popup-stat-label">Rata-rata penurunan<br>biaya operasional</div>
+      </div>
+      <div class="popup-divider"></div>
+      <div class="popup-stat">
+        <div class="popup-stat-num">5 Hari</div>
+        <div class="popup-stat-label">Rata-rata waktu<br>implementasi</div>
+      </div>
+    </div>
+
+    <a href="https://erlanv2.vercel.app/checkup.html" target="_blank" class="popup-cta" onclick="closePopup()">
+      Hitung Potensi Profit Saya →
+    </a>
+    <button class="popup-skip" onclick="closePopup()">
+      Lewati, saya tidak tertarik meningkatkan profit
+    </button>
   </div>
 </div>
 

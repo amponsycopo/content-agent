@@ -1522,27 +1522,27 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── CAROUSEL GENERATOR ──────────────────────────────────────────
 
 const CAROUSEL_THEMES = {
-  dark:  { name: 'Dark Accent', bg: '#0a0a0a', card: '#111111', accent: '#e8ff47', text: '#f0f0f0', subtext: '#888888', border: '#222222', numBg: '#e8ff47', numText: '#000000' },
-  light: { name: 'Light Clean', bg: '#f5f5f0', card: '#ffffff', accent: '#111111', text: '#111111', subtext: '#666666', border: '#e0e0e0', numBg: '#111111', numText: '#ffffff' },
-  bold:  { name: 'Bold Orange', bg: '#0f0a00', card: '#1a1000', accent: '#ff6b00', text: '#fff8f0', subtext: '#997755', border: '#2a1a00', numBg: '#ff6b00', numText: '#ffffff' },
-  navy:  { name: 'Navy Pro', bg: '#050d1a', card: '#0a1628', accent: '#4da6ff', text: '#e8f4ff', subtext: '#6699bb', border: '#112233', numBg: '#4da6ff', numText: '#000000' },
+  integrate: { name: 'Integrate Blue', bg: '#1a56db', card: '#ffffff', accent: '#1a56db', accentLight: '#eff4ff', text: '#0f172a', subtext: '#475569', border: '#e2e8f0', numBg: '#1a56db', numText: '#ffffff', white: '#ffffff' },
+  dark:      { name: 'Dark Pro', bg: '#0a0a0a', card: '#111111', accent: '#1a56db', accentLight: '#1e3a5f', text: '#f0f0f0', subtext: '#888888', border: '#222222', numBg: '#1a56db', numText: '#ffffff', white: '#ffffff' },
+  light:     { name: 'Clean White', bg: '#f8fafc', card: '#ffffff', accent: '#1a56db', accentLight: '#eff4ff', text: '#0f172a', subtext: '#64748b', border: '#e2e8f0', numBg: '#1a56db', numText: '#ffffff', white: '#ffffff' },
+  bold:      { name: 'Bold Navy', bg: '#0f172a', card: '#1e293b', accent: '#3b82f6', accentLight: '#1e3a5f', text: '#f1f5f9', subtext: '#94a3b8', border: '#334155', numBg: '#3b82f6', numText: '#ffffff', white: '#ffffff' },
 };
 
 let _carouselData = null;
-let _currentTheme = 'dark';
+let _currentTheme = 'integrate';
 let _canvases = [];
 
 function openCarouselGenerator(data) {
   if (!data || !data.slides || !data.slides.length) { showToast('❗ Generate Instagram dulu!'); return; }
   _carouselData = data;
-  _currentTheme = 'dark';
+  _currentTheme = 'integrate';
 
   const modal = document.createElement('div');
   modal.className = 'carousel-modal';
   modal.id = 'carousel-modal';
 
   const themes = Object.entries(CAROUSEL_THEMES).map(([key, t]) =>
-    '<button class="theme-chip ' + (key === 'dark' ? 'active' : '') + '" onclick="setCarouselTheme(\'' + key + '\', this)">' + t.name + '</button>'
+    '<button class="theme-chip ' + (key === 'integrate' ? 'active' : '') + '" onclick="setCarouselTheme(\'' + key + '\', this)">' + t.name + '</button>'
   ).join('');
 
   modal.innerHTML = '<div class="carousel-modal-inner">' +
@@ -1608,73 +1608,132 @@ function renderAllCarouselSlides() {
 function drawSlide(canvas, slide, idx, total) {
   const ctx = canvas.getContext('2d');
   const W = 1080, H = 1080;
-  const theme = CAROUSEL_THEMES[_currentTheme];
+  const t = CAROUSEL_THEMES[_currentTheme];
 
-  ctx.fillStyle = theme.bg;
+  // ── Background ──
+  ctx.fillStyle = t.bg;
   ctx.fillRect(0, 0, W, H);
 
-  ctx.strokeStyle = theme.border;
-  ctx.lineWidth = 1;
-  ctx.globalAlpha = 0.35;
-  for (let x = 0; x <= W; x += 80) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y = 0; y <= H; y += 80) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // Subtle dot pattern on background
+  ctx.fillStyle = t.white;
+  ctx.globalAlpha = 0.06;
+  for (let x = 40; x < W; x += 60) {
+    for (let y = 40; y < H; y += 60) {
+      ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI*2); ctx.fill();
+    }
+  }
   ctx.globalAlpha = 1;
 
-  const m = 55;
-  ctx.fillStyle = theme.card;
-  drawRoundRect(ctx, m, m, W-m*2, H-m*2, 30);
+  // ── Main white card ──
+  const m = 48;
+  ctx.fillStyle = t.card;
+  ctx.shadowColor = 'rgba(0,0,0,0.15)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 8;
+  drawRoundRect(ctx, m, m, W-m*2, H-m*2, 32);
+  ctx.fill();
+  ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+  // ── Top accent bar (full width) ──
+  ctx.fillStyle = t.accent;
+  drawRoundRect(ctx, m, m, W-m*2, 12, {tl:32,tr:32,br:0,bl:0});
   ctx.fill();
 
-  ctx.fillStyle = theme.accent;
-  drawRoundRect(ctx, m, m, W-m*2, 10, {tl:30,tr:30,br:0,bl:0});
-  ctx.fill();
+  const px = m + 60;
+  const pw = W - (m+60)*2;
+  let curY = m + 80;
 
-  const px = m + 64;
-  const pw = W - (m+64)*2;
-  const ny = m + 62;
-
-  ctx.fillStyle = theme.numBg;
-  drawRoundRect(ctx, px, ny, 80, 38, 10);
+  // ── Slide counter pill ──
+  const pillW = 110, pillH = 40;
+  ctx.fillStyle = t.accentLight;
+  drawRoundRect(ctx, px, curY, pillW, pillH, 20);
   ctx.fill();
-  ctx.fillStyle = theme.numText;
-  ctx.font = 'bold 17px system-ui, sans-serif';
+  ctx.fillStyle = t.accent;
+  ctx.font = 'bold 18px system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText((slide.num || idx+1) + ' / ' + total, px+40, ny+26);
+  ctx.fillText((slide.num || idx+1) + ' / ' + total, px + pillW/2, curY + 27);
   ctx.textAlign = 'left';
+  curY += pillH + 36;
 
-  const tSize = slide.title.length > 45 ? 50 : slide.title.length > 28 ? 58 : 66;
-  ctx.fillStyle = theme.text;
-  ctx.font = 'bold ' + tSize + 'px system-ui, sans-serif';
-  const tY = ny + 88;
-  const tH = wrapCanvasText(ctx, slide.title, px, tY, pw, tSize * 1.28);
+  // ── Title ──
+  const tSize = slide.title.length > 40 ? 52 : slide.title.length > 25 ? 60 : 68;
+  ctx.fillStyle = t.text;
+  ctx.font = '800 ' + tSize + 'px system-ui, sans-serif';
+  const tH = wrapCanvasText(ctx, slide.title, px, curY, pw, tSize * 1.3);
+  curY += tH + 28;
 
-  const divY = tY + tH + 18;
-  ctx.fillStyle = theme.accent;
-  ctx.fillRect(px, divY, 64, 5);
+  // ── Blue divider line ──
+  ctx.fillStyle = t.accent;
+  ctx.fillRect(px, curY, 72, 5);
+  curY += 36;
 
-  ctx.fillStyle = theme.subtext;
-  ctx.font = '400 30px system-ui, sans-serif';
-  wrapCanvasText(ctx, slide.content, px, divY + 44, pw, 46);
+  // ── Content card (highlight box) ──
+  const contentLines = splitIntoLines(ctx, slide.content, pw - 64, '400 28px system-ui, sans-serif');
+  const cardPadV = 28, cardPadH = 32;
+  const lineH = 44;
+  const cardH = contentLines.length * lineH + cardPadV * 2;
 
-  const barY = H - m - 78;
-  ctx.strokeStyle = theme.border;
-  ctx.lineWidth = 1;
-  ctx.globalAlpha = 0.4;
+  // Card background
+  ctx.fillStyle = t.accentLight;
+  drawRoundRect(ctx, px, curY, pw, cardH, 16);
+  ctx.fill();
+
+  // Left accent strip inside card
+  ctx.fillStyle = t.accent;
+  drawRoundRect(ctx, px, curY, 6, cardH, {tl:16,tr:0,br:0,bl:16});
+  ctx.fill();
+
+  // Card text
+  ctx.fillStyle = t.subtext;
+  ctx.font = '400 28px system-ui, sans-serif';
+  contentLines.forEach(function(line, i) {
+    ctx.fillText(line, px + cardPadH + 14, curY + cardPadV + (i * lineH) + 28);
+  });
+  curY += cardH;
+
+  // ── Bottom bar ──
+  const barY = H - m - 72;
+
+  // Bottom separator
+  ctx.strokeStyle = t.border;
+  ctx.lineWidth = 1.5;
+  ctx.globalAlpha = 0.6;
   ctx.beginPath(); ctx.moveTo(px, barY); ctx.lineTo(px+pw, barY); ctx.stroke();
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = theme.accent;
-  ctx.font = 'bold 22px system-ui, sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('@erlan', px, barY+38);
+  // Logo dot + brand name
+  ctx.fillStyle = t.accent;
+  ctx.beginPath(); ctx.arc(px + 10, barY + 30, 8, 0, Math.PI*2); ctx.fill();
+  ctx.font = 'bold 24px system-ui, sans-serif';
+  ctx.fillStyle = t.accent;
+  ctx.fillText('integrate.asia', px + 26, barY + 38);
 
+  // Swipe hint
   if (idx < total - 1) {
-    ctx.fillStyle = theme.subtext;
+    ctx.fillStyle = t.subtext;
     ctx.font = '400 20px system-ui, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('swipe →', px+pw, barY+38);
+    ctx.fillText('swipe →', px + pw, barY + 38);
   }
   ctx.textAlign = 'left';
+}
+
+// Helper: split text into lines that fit maxW
+function splitIntoLines(ctx, text, maxW, font) {
+  ctx.font = font;
+  var words = text.split(' ');
+  var lines = [];
+  var line = '';
+  for (var i = 0; i < words.length; i++) {
+    var test = line ? line + ' ' + words[i] : words[i];
+    if (ctx.measureText(test).width > maxW && line) {
+      lines.push(line);
+      line = words[i];
+      if (lines.length >= 6) { lines[lines.length-1] += '...'; break; }
+    } else { line = test; }
+  }
+  if (line && lines.length < 6) lines.push(line);
+  return lines;
 }
 
 function drawRoundRect(ctx, x, y, w, h, r) {

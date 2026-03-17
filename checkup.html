@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business AI Checkup — Integrate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #1a56db;
+  --blue-dark: #1341b0;
+  --blue-light: #eff4ff;
+  --blue-mid: #dbeafe;
+  --text: #0f172a;
+  --text2: #334155;
+  --text3: #64748b;
+  --text4: #94a3b8;
+  --border: #e2e8f0;
+  --border2: #cbd5e1;
+  --bg: #ffffff;
+  --bg2: #f8fafc;
+  --bg3: #f1f5f9;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --orange: #d97706;
+  --orange-light: #fffbeb;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── TOPNAV ── */
+.topnav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 13px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.nav-logo-mark {
+  width: 28px; height: 28px; background: var(--blue);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+}
+.nav-logo-dot { width: 7px; height: 7px; background: #fff; border-radius: 50%; }
+.nav-logo-text { font-size: 15px; font-weight: 800; color: var(--blue); }
+.nav-label { font-size: 12px; color: var(--text3); font-weight: 600; }
+
+/* ── PHASES ── */
+.phase { display: none; min-height: calc(100vh - 53px); }
+.phase.active { display: flex; flex-direction: column; }
+
+/* ── INTRO ── */
+#phase-intro {
+  align-items: center; justify-content: center;
+  padding: 48px 24px;
+}
+.intro-inner { max-width: 540px; width: 100%; }
+.intro-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--blue-light); border: 1px solid rgba(26,86,219,0.2);
+  border-radius: 99px; padding: 5px 14px;
+  font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 24px;
+}
+.intro-badge-dot {
+  width: 6px; height: 6px; background: var(--blue); border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.intro-title {
+  font-size: clamp(28px, 5vw, 42px); font-weight: 800;
+  color: var(--text); line-height: 1.2; letter-spacing: -1px; margin-bottom: 16px;
+}
+.intro-title span { color: var(--blue); }
+.intro-sub {
+  font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 28px;
+}
+.value-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+.value-item { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text2); }
+.value-icon {
+  width: 32px; height: 32px; background: var(--blue-light);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.btn-primary {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--blue), #3b82f6);
+  border: none; border-radius: 12px; color: #fff;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+  font-family: inherit; letter-spacing: -0.3px;
+  box-shadow: 0 8px 24px rgba(26,86,219,0.28);
+  transition: transform 0.15s;
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.intro-note { text-align: center; margin-top: 14px; font-size: 12px; color: var(--text4); }
+
+/* ── IDENTITY FORM ── */
+#phase-identity {
+  align-items: center; justify-content: center; padding: 48px 24px;
+}
+.identity-inner { max-width: 480px; width: 100%; }
+.identity-title { font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 8px; letter-spacing: -0.5px; }
+.identity-sub { font-size: 14px; color: var(--text3); line-height: 1.7; margin-bottom: 28px; }
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; display: block; }
+.form-input {
+  width: 100%; padding: 13px 16px;
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 15px; color: var(--text);
+  font-family: inherit; outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--blue); background: #fff; }
+.form-input::placeholder { color: var(--text4); }
+.form-note { font-size: 11px; color: var(--text4); margin-top: 5px; }
+
+/* ── QUESTIONS ── */
+#phase-questions { padding: 28px 24px 60px; align-items: flex-start; }
+.q-inner { max-width: 600px; width: 100%; margin: 0 auto; }
+
+.progress-header { margin-bottom: 24px; }
+.progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.section-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--blue-light); color: var(--blue);
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 4px 12px;
+  border-radius: 99px; border: 1px solid rgba(26,86,219,0.15);
+}
+.progress-count { font-size: 12px; color: var(--text3); font-weight: 600; }
+.progress-bar { height: 5px; background: var(--bg3); border-radius: 99px; }
+.progress-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--blue), #3b82f6);
+  transition: width 0.5s ease;
+}
+
+.q-title {
+  font-size: clamp(17px, 3vw, 22px); font-weight: 800;
+  color: var(--text); line-height: 1.35; margin-bottom: 8px; letter-spacing: -0.4px;
+}
+.q-sub { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 20px; }
+.q-multi-hint { font-size: 12px; color: var(--blue); font-weight: 700; margin-bottom: 14px; }
+
+.options-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.option-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 16px; border-radius: 10px;
+  border: 2px solid var(--border); background: #fff;
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.option-card:hover { border-color: var(--border2); }
+.option-card.selected { border-color: var(--blue); background: var(--blue-light); }
+.option-check {
+  width: 20px; height: 20px; flex-shrink: 0;
+  border: 2px solid var(--border2); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-size: 11px; font-weight: 900; color: #fff;
+}
+.option-check.circle { border-radius: 50%; }
+.option-check.square { border-radius: 5px; }
+.option-card.selected .option-check { background: var(--blue); border-color: var(--blue); }
+.option-icon { font-size: 18px; flex-shrink: 0; }
+.option-label { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.option-card.selected .option-label { color: var(--blue); }
+
+.nav-btns { display: flex; gap: 12px; }
+.btn-back {
+  padding: 13px 20px; border-radius: 10px;
+  background: transparent; border: 1.5px solid var(--border);
+  color: var(--text3); font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.btn-back:hover { border-color: var(--border2); color: var(--text); }
+.btn-next {
+  flex: 1; padding: 14px; border-radius: 10px; border: none;
+  background: linear-gradient(135deg, var(--blue), #3b82f6);
+  color: #fff; font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: inherit; letter-spacing: -0.3px;
+  transition: all 0.2s;
+}
+.btn-next:disabled { background: var(--bg3); color: var(--text4); cursor: not-allowed; }
+
+/* ── ANALYZING ── */
+#phase-analyzing {
+  align-items: center; justify-content: center; text-align: center; padding: 48px 24px;
+}
+.analyzing-inner { max-width: 400px; }
+.analyzing-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 12px; letter-spacing: -0.5px; }
+.analyzing-sub { font-size: 14px; color: var(--text3); line-height: 1.7; margin-bottom: 28px; }
+.dots { display: flex; gap: 8px; justify-content: center; }
+.dot {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--blue);
+  animation: ldots 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes ldots { 0%,100%{opacity:.2;transform:scale(.8)} 50%{opacity:1;transform:scale(1.2)} }
+
+/* ── REPORT ── */
+#phase-report {
+  background: var(--bg2); align-items: flex-start;
+  padding: 28px 20px 60px;
+}
+.report-inner { max-width: 800px; width: 100%; margin: 0 auto; }
+
+.report-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px;
+  margin-bottom: 16px;
+}
+.section-title-sm {
+  font-size: 10px; color: var(--text3); letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 700; margin-bottom: 14px;
+}
+
+/* Score */
+.score-center { text-align: center; }
+.score-ring-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 14px; }
+.score-ring-wrap svg { transform: rotate(-90deg); }
+.score-inner {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.score-num { font-size: 30px; font-weight: 900; line-height: 1; }
+.score-denom { font-size: 10px; color: var(--text3); font-weight: 700; }
+.score-label-badge {
+  display: inline-block; font-size: 12px; font-weight: 700;
+  padding: 4px 14px; border-radius: 99px; margin-bottom: 14px;
+}
+.score-headline {
+  font-size: clamp(17px, 2.8vw, 22px); font-weight: 800;
+  color: var(--text); line-height: 1.3; margin-bottom: 10px; letter-spacing: -0.4px;
+}
+.score-summary { font-size: 14px; color: var(--text2); line-height: 1.8; max-width: 560px; margin: 0 auto; }
+
+/* 2-col grid */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+.stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; background: var(--bg2); border-radius: 8px; margin-bottom: 6px;
+}
+.stat-row:last-child { margin-bottom: 0; }
+.stat-label { font-size: 12px; color: var(--text3); }
+.stat-val { font-size: 13px; font-weight: 800; }
+
+.highlight-box {
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 12px; line-height: 1.6; margin-top: 10px;
+}
+
+/* Bottlenecks */
+.bottleneck-item {
+  padding: 14px 16px; background: var(--bg2);
+  border-radius: 12px; border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.bottleneck-item:last-child { margin-bottom: 0; }
+.bottleneck-top {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;
+}
+.bottleneck-area { font-size: 14px; font-weight: 700; color: var(--text); }
+.severity-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 99px; }
+.bottleneck-desc { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 6px; }
+.bottleneck-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+.bottleneck-meta span { font-size: 11px; font-weight: 600; }
+
+/* Automation */
+.auto-item {
+  display: flex; gap: 14px; padding: 14px 16px;
+  background: var(--green-light); border: 1px solid rgba(5,150,105,0.15);
+  border-radius: 12px; margin-bottom: 10px;
+}
+.auto-item:last-child { margin-bottom: 0; }
+.auto-num {
+  width: 28px; height: 28px; background: var(--green); color: #fff;
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.auto-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.auto-desc { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 8px; }
+.auto-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+.auto-meta span { font-size: 11px; font-weight: 600; }
+
+/* Projection */
+.proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.proj-item { background: var(--bg2); border-radius: 10px; padding: 14px 12px; text-align: center; border: 1px solid var(--border); }
+.proj-label { font-size: 10px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.proj-val { font-size: clamp(18px, 3vw, 24px); font-weight: 900; }
+
+/* Recommendation */
+.rec-card {
+  background: linear-gradient(135deg, var(--blue), #1e40af);
+  border-radius: 16px; padding: 22px 24px; margin-bottom: 16px;
+}
+.rec-label { font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; }
+.rec-text { font-size: 14px; color: rgba(255,255,255,0.92); line-height: 1.8; }
+
+/* CTA */
+.cta-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 24px; text-align: center;
+}
+.cta-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 8px; letter-spacing: -0.3px; }
+.cta-sub { font-size: 13px; color: var(--text3); line-height: 1.7; margin-bottom: 22px; }
+.btn-wa {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 28px; border-radius: 12px;
+  background: #25d366; color: #fff;
+  font-size: 15px; font-weight: 800; text-decoration: none;
+  box-shadow: 0 6px 20px rgba(37,211,102,0.3);
+  font-family: inherit; border: none; cursor: pointer;
+  transition: transform 0.15s;
+}
+.btn-wa:hover { transform: translateY(-1px); }
+.cta-note { margin-top: 12px; font-size: 11px; color: var(--text4); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  transition: transform 0.3s; z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 480px) {
+  .proj-grid { grid-template-columns: 1fr; }
+  #phase-intro, #phase-identity { padding: 32px 18px; }
+  #phase-questions { padding: 20px 18px 48px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <a href="https://integrate.asia" class="nav-logo">
+    <div class="nav-logo-mark"><div class="nav-logo-dot"></div></div>
+    <span class="nav-logo-text">Integrate</span>
+  </a>
+  <span class="nav-label">Business AI Checkup</span>
+</nav>
+
+<!-- PHASE: INTRO -->
+<div class="phase active" id="phase-intro">
+  <div class="intro-inner">
+    <div class="intro-badge">
+      <span class="intro-badge-dot"></span>
+      Business AI Checkup — Gratis
+    </div>
+    <h1 class="intro-title">
+      Seberapa besar potensi<br>
+      <span>AI untuk bisnis Anda?</span>
+    </h1>
+    <p class="intro-sub">
+      Jawab <strong>20 pertanyaan singkat</strong> seputar operasional bisnis Anda. AI kami akan menganalisis bottleneck, menghitung estimasi waktu & biaya yang terbuang, serta mengidentifikasi peluang otomasi yang paling berdampak.
+    </p>
+    <div class="value-list">
+      <div class="value-item"><div class="value-icon">⏱️</div>Selesai dalam 5–7 menit</div>
+      <div class="value-item"><div class="value-icon">🔍</div>Analisis bottleneck operasional yang spesifik</div>
+      <div class="value-item"><div class="value-icon">💰</div>Estimasi biaya inefisiensi & potensi penghematan konkret</div>
+      <div class="value-item"><div class="value-icon">🚀</div>Rekomendasi peluang otomasi AI yang diprioritaskan</div>
+      <div class="value-item"><div class="value-icon">📊</div>Proyeksi peningkatan profit bisnis Anda</div>
+    </div>
+    <button class="btn-primary" onclick="showPhase('identity')">
+      Mulai Checkup Bisnis Saya →
+    </button>
+    <p class="intro-note">Gratis sepenuhnya · Tidak ada kewajiban apapun · Data Anda terjaga kerahasiaannya</p>
+  </div>
+</div>
+
+<!-- PHASE: IDENTITY -->
+<div class="phase" id="phase-identity">
+  <div class="identity-inner">
+    <h2 class="identity-title">Sebelum memulai, perkenalkan diri Anda</h2>
+    <p class="identity-sub">
+      Laporan AI Efficiency Report akan dikirimkan secara personal. Informasi ini juga memungkinkan tim kami untuk menindaklanjuti hasil checkup Anda jika diperlukan.
+    </p>
+    <div class="form-group">
+      <label class="form-label">Nama Lengkap *</label>
+      <input class="form-input" type="text" id="input-name" placeholder="Contoh: Budi Santoso" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nama Bisnis *</label>
+      <input class="form-input" type="text" id="input-business" placeholder="Contoh: PT Maju Bersama / Toko Sumber Rejeki" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nomor WhatsApp *</label>
+      <input class="form-input" type="tel" id="input-wa" placeholder="Contoh: 08123456789" />
+      <p class="form-note">Untuk pengiriman laporan dan tindak lanjut konsultasi</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jabatan / Posisi</label>
+      <input class="form-input" type="text" id="input-role" placeholder="Contoh: Owner, Direktur, Manager Operasional" />
+    </div>
+    <button class="btn-primary" id="btn-start-questions" onclick="startQuestions()">
+      Lanjut ke Assessment →
+    </button>
+    <p class="intro-note" style="margin-top:14px;">Data Anda aman dan tidak akan dibagikan kepada pihak ketiga</p>
+  </div>
+</div>
+
+<!-- PHASE: QUESTIONS -->
+<div class="phase" id="phase-questions">
+  <div class="q-inner">
+    <div class="progress-header">
+      <div class="progress-top">
+        <div class="section-badge" id="section-badge">🏢 Bagian 1 — Profil Bisnis</div>
+        <span class="progress-count" id="progress-count">1 / 20</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:5%"></div>
+      </div>
+    </div>
+    <h2 class="q-title" id="q-title">Pertanyaan loading...</h2>
+    <p class="q-sub" id="q-sub"></p>
+    <p class="q-multi-hint" id="q-multi-hint" style="display:none;">Pilih semua yang sesuai</p>
+    <div class="options-list" id="options-list"></div>
+    <div class="nav-btns">
+      <button class="btn-back" id="btn-back" onclick="prevQ()" style="display:none;">← Kembali</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()" disabled>Lanjut →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE: ANALYZING -->
+<div class="phase" id="phase-analyzing">
+  <div class="analyzing-inner">
+    <div style="font-size:52px;margin-bottom:24px;">🔍</div>
+    <h2 class="analyzing-title">Menganalisis bisnis Anda...</h2>
+    <p class="analyzing-sub">
+      AI kami sedang memproses seluruh jawaban Anda, mengkalkulasi estimasi inefisiensi, dan menyusun rekomendasi yang spesifik untuk bisnis Anda.
+    </p>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE: REPORT -->
+<div class="phase" id="phase-report">
+  <div class="report-inner" id="report-inner">
+    <!-- Generated dynamically -->
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const WA_NUMBER = '6285161165654';
+
+// ── QUESTIONS DATA ──────────────────────────────────────────────
+const SECTIONS = [
+  { num: 1, title: 'Profil Bisnis', icon: '🏢' },
+  { num: 2, title: 'Mapping Operasional', icon: '⚙️' },
+  { num: 3, title: 'Bottleneck Waktu', icon: '⏱️' },
+  { num: 4, title: 'Bottleneck Biaya', icon: '💰' },
+  { num: 5, title: 'Pain Point', icon: '😤' },
+  { num: 6, title: 'AI Readiness', icon: '🚀' },
+  { num: 7, title: 'Target Dampak', icon: '🎯' },
+];
+
+const ALL_Q = [
+  // Section 1 - Profil Bisnis
+  { id:'industry', sec:1, type:'single', q:'Industri bisnis Anda bergerak di bidang apa?', opts:[
+    {v:'retail',l:'Retail & Perdagangan',i:'🏪'},
+    {v:'fnb',l:'F&B & Kuliner',i:'🍽️'},
+    {v:'manufaktur',l:'Manufaktur & Produksi',i:'🏭'},
+    {v:'jasa',l:'Jasa Profesional',i:'💼'},
+    {v:'properti',l:'Properti & Konstruksi',i:'🏗️'},
+    {v:'kesehatan',l:'Kesehatan & Kecantikan',i:'🏥'},
+    {v:'edukasi',l:'Pendidikan & Pelatihan',i:'📚'},
+    {v:'lainnya',l:'Lainnya',i:'📋'},
+  ]},
+  { id:'biz_model', sec:1, type:'single', q:'Model bisnis utama Anda?', opts:[
+    {v:'b2c',l:'B2C — Langsung ke konsumen akhir',i:'👤'},
+    {v:'b2b',l:'B2B — Ke bisnis atau korporasi',i:'🏢'},
+    {v:'marketplace',l:'Marketplace — Platform perantara',i:'🛒'},
+    {v:'agency',l:'Agency / Jasa',i:'💼'},
+    {v:'saas',l:'SaaS / Produk Digital',i:'💻'},
+  ]},
+  { id:'revenue', sec:1, type:'single', q:'Rata-rata omzet bisnis Anda per bulan?', opts:[
+    {v:'<50',l:'Di bawah Rp 50 juta',i:'📊'},
+    {v:'50-200',l:'Rp 50 juta – Rp 200 juta',i:'📊'},
+    {v:'200-500',l:'Rp 200 juta – Rp 500 juta',i:'📊'},
+    {v:'500+',l:'Di atas Rp 500 juta',i:'📊'},
+  ]},
+  { id:'employees', sec:1, type:'single', q:'Jumlah karyawan atau anggota tim saat ini?', opts:[
+    {v:'1-5',l:'1 – 5 orang',i:'👤'},
+    {v:'6-20',l:'6 – 20 orang',i:'👥'},
+    {v:'21-50',l:'21 – 50 orang',i:'👥'},
+    {v:'50+',l:'Lebih dari 50 orang',i:'🏢'},
+  ]},
+  { id:'channels', sec:1, type:'multi', q:'Channel penjualan utama yang aktif digunakan?', sub:'Pilih semua yang relevan', opts:[
+    {v:'marketplace',l:'Marketplace (Tokopedia, Shopee, dll)',i:'🛒'},
+    {v:'whatsapp',l:'WhatsApp / WA Business',i:'💬'},
+    {v:'website',l:'Website / Toko Online sendiri',i:'🌐'},
+    {v:'offline',l:'Toko fisik / Offline',i:'🏪'},
+    {v:'social',l:'Media sosial (IG, TikTok, dll)',i:'📱'},
+    {v:'direct',l:'Direct sales / Tim lapangan',i:'🤝'},
+  ]},
+  // Section 2 - Mapping Operasional
+  { id:'processes', sec:2, type:'multi', q:'Proses apa saja yang berjalan di bisnis Anda?', sub:'Pilih semua yang ada dalam operasional sehari-hari', opts:[
+    {v:'cs',l:'Customer Support',i:'💬'},
+    {v:'order',l:'Order Processing',i:'📦'},
+    {v:'inventory',l:'Inventory Management',i:'🗃️'},
+    {v:'content',l:'Marketing & Content Creation',i:'📢'},
+    {v:'leadgen',l:'Lead Generation',i:'🎯'},
+    {v:'dataentry',l:'Data Entry & Administrasi',i:'⌨️'},
+    {v:'accounting',l:'Akuntansi & Keuangan',i:'💰'},
+    {v:'hr',l:'HR & Rekrutmen',i:'👥'},
+    {v:'reporting',l:'Reporting & Analytics',i:'📊'},
+  ]},
+  // Section 3 - Bottleneck Waktu
+  { id:'time_wasters', sec:3, type:'multi', q:'Aktivitas yang paling menyita waktu tim Anda setiap harinya?', sub:'Pilih semua yang relevan', opts:[
+    {v:'balas_chat',l:'Membalas pesan & pertanyaan pelanggan',i:'💬'},
+    {v:'input_order',l:'Input dan proses data pesanan',i:'📝'},
+    {v:'rekap',l:'Rekap & pembuatan laporan',i:'📊'},
+    {v:'followup',l:'Follow-up prospek & calon pelanggan',i:'🔄'},
+    {v:'buat_konten',l:'Membuat & menjadwalkan konten',i:'📸'},
+    {v:'edit_konten',l:'Editing konten & desain',i:'✏️'},
+    {v:'monitoring',l:'Monitoring marketplace & toko online',i:'👁️'},
+    {v:'koordinasi',l:'Koordinasi dan komunikasi internal tim',i:'📅'},
+  ]},
+  { id:'bottleneck_process', sec:3, type:'multi', q:'Proses yang paling sering membuat tim Anda menunggu atau terhambat?', sub:'Pilih maksimal 3 yang paling kritis', opts:[
+    {v:'approval',l:'Menunggu persetujuan atasan',i:'✅'},
+    {v:'data_manual',l:'Input data secara manual',i:'⌨️'},
+    {v:'vendor',l:'Koordinasi dengan vendor/supplier',i:'🤝'},
+    {v:'cek_stok',l:'Pengecekan stok secara manual',i:'📦'},
+    {v:'buat_laporan',l:'Pembuatan laporan berkala',i:'📋'},
+    {v:'komplain',l:'Penanganan komplain pelanggan',i:'😤'},
+    {v:'rekonsiliasi',l:'Rekonsiliasi data keuangan',i:'💹'},
+  ]},
+  // Section 4 - Bottleneck Biaya
+  { id:'cost_divisi', sec:4, type:'multi', q:'Divisi yang paling banyak menghabiskan biaya operasional?', sub:'Pilih semua yang signifikan', opts:[
+    {v:'cs',l:'Customer Service',i:'💬'},
+    {v:'admin',l:'Admin & Data Entry',i:'⌨️'},
+    {v:'marketing',l:'Marketing & Iklan',i:'📣'},
+    {v:'content',l:'Produksi Konten',i:'🎬'},
+    {v:'logistik',l:'Logistik & Pengiriman',i:'🚚'},
+    {v:'sdm',l:'Gaji & SDM',i:'👥'},
+    {v:'reporting',l:'Reporting & Analitik',i:'📊'},
+  ]},
+  { id:'cost_cs', sec:4, type:'single', q:'Estimasi biaya bulanan untuk Customer Service & Admin?', sub:'Termasuk gaji, tools, dan biaya operasional terkait', opts:[
+    {v:'<5',l:'Di bawah Rp 5 juta / bulan',i:'💰'},
+    {v:'5-15',l:'Rp 5 juta – Rp 15 juta / bulan',i:'💰'},
+    {v:'15-50',l:'Rp 15 juta – Rp 50 juta / bulan',i:'💰'},
+    {v:'50+',l:'Di atas Rp 50 juta / bulan',i:'💰'},
+  ]},
+  { id:'cost_marketing', sec:4, type:'single', q:'Estimasi biaya bulanan untuk Marketing & Produksi Konten?', sub:'Termasuk tim, agency, tools, dan biaya iklan', opts:[
+    {v:'<5',l:'Di bawah Rp 5 juta / bulan',i:'📣'},
+    {v:'5-20',l:'Rp 5 juta – Rp 20 juta / bulan',i:'📣'},
+    {v:'20-100',l:'Rp 20 juta – Rp 100 juta / bulan',i:'📣'},
+    {v:'100+',l:'Di atas Rp 100 juta / bulan',i:'📣'},
+  ]},
+  { id:'ai_interest', sec:4, type:'single', q:'Jika proses-proses ini dapat dipercepat 3–5x dengan AI, seberapa tertarik Anda?', opts:[
+    {v:'sangat',l:'Sangat tertarik — ingin segera mulai',i:'🚀'},
+    {v:'tertarik',l:'Tertarik — ingin tahu lebih lanjut dulu',i:'🤔'},
+    {v:'perlu_bukti',l:'Perlu lebih banyak bukti & data',i:'📊'},
+    {v:'belum',l:'Belum yakin saat ini',i:'⏳'},
+  ]},
+  // Section 5 - Pain Point
+  { id:'frustrations', sec:5, type:'multi', q:'Hal yang paling membuat Anda frustrasi dalam operasional bisnis?', sub:'Pilih semua yang pernah Anda rasakan', opts:[
+    {v:'tergantung_orang',l:'Terlalu bergantung pada satu atau dua orang kunci',i:'👤'},
+    {v:'waktu_manual',l:'Waktu habis untuk pekerjaan manual & repetitif',i:'⏰'},
+    {v:'error_manusia',l:'Banyak kesalahan akibat proses manual',i:'❌'},
+    {v:'lambat_scale',l:'Sulit berkembang karena kapasitas tim terbatas',i:'📈'},
+    {v:'data_berantakan',l:'Data berserakan dan sulit dianalisis',i:'📋'},
+    {v:'biaya_sdm',l:'Biaya SDM terus naik tapi produktivitas stagnan',i:'💸'},
+    {v:'lambat_respons',l:'Respons ke pelanggan lambat dan tidak konsisten',i:'💬'},
+  ]},
+  { id:'automation_wish', sec:5, type:'multi', q:'Jika ada AI yang dapat membantu bisnis Anda, apa yang paling ingin diotomasi?', sub:'Pilih hingga 3 prioritas utama', opts:[
+    {v:'cs_ai',l:'Customer Service AI — balas pertanyaan otomatis',i:'🤖'},
+    {v:'content_ai',l:'AI Content Automation — buat konten massal',i:'✍️'},
+    {v:'marketing_ai',l:'AI Marketing — optimasi iklan & lead gen',i:'📣'},
+    {v:'reporting_ai',l:'AI Reporting — laporan otomatis real-time',i:'📊'},
+    {v:'finance_ai',l:'AI Finance Assistant — analisis keuangan',i:'💹'},
+    {v:'data_ai',l:'AI Data Processing — input & olah data otomatis',i:'⚙️'},
+    {v:'hr_ai',l:'AI HR — rekrutmen & onboarding otomatis',i:'👥'},
+  ]},
+  // Section 6 - AI Readiness
+  { id:'ai_exp', sec:6, type:'single', q:'Apakah bisnis Anda sudah menggunakan AI sebelumnya?', opts:[
+    {v:'belum',l:'Belum pernah sama sekali',i:'🌱'},
+    {v:'sedikit',l:'Sedikit — pernah coba ChatGPT atau tools serupa',i:'🔍'},
+    {v:'cukup',l:'Cukup banyak — sudah pakai beberapa AI tools rutin',i:'⚡'},
+    {v:'advanced',l:'Sudah advanced — AI terintegrasi dalam workflow',i:'🚀'},
+  ]},
+  { id:'current_tools', sec:6, type:'multi', q:'Tools dan sistem yang sudah digunakan saat ini?', sub:'Pilih semua yang aktif digunakan', opts:[
+    {v:'spreadsheet',l:'Google Sheets / Excel',i:'📊'},
+    {v:'notion',l:'Notion / Project management tools',i:'📝'},
+    {v:'crm',l:'CRM (HubSpot, Salesforce, dll)',i:'👥'},
+    {v:'erp',l:'ERP / Software Akuntansi (Accurate, Jurnal)',i:'💹'},
+    {v:'marketplace_tools',l:'Tools marketplace (Seller Center, dll)',i:'🛒'},
+    {v:'wa_api',l:'WhatsApp Business API',i:'💬'},
+    {v:'manual',l:'Sebagian besar masih manual / belum digital',i:'📋'},
+  ]},
+  // Section 7 - Target Dampak
+  { id:'profit_target', sec:7, type:'single', q:'Jika operasional bisnis Anda bisa lebih efisien 50% dan biaya turun 30%, berapa peningkatan profit yang Anda targetkan?', opts:[
+    {v:'10-20',l:'Peningkatan 10–20% dalam 6 bulan',i:'📈'},
+    {v:'20-50',l:'Peningkatan 20–50% dalam 6 bulan',i:'📈'},
+    {v:'50-100',l:'Peningkatan 50–100% dalam 1 tahun',i:'🚀'},
+    {v:'100+',l:'Lebih dari 2x lipat dalam 1 tahun',i:'🚀'},
+  ]},
+  { id:'timeline', sec:7, type:'single', q:'Kapan Anda berencana mulai mengimplementasikan solusi AI?', opts:[
+    {v:'sekarang',l:'Segera — dalam 1 bulan ke depan',i:'⚡'},
+    {v:'1-3',l:'Dalam 1–3 bulan ke depan',i:'📅'},
+    {v:'3-6',l:'Dalam 3–6 bulan ke depan',i:'📅'},
+    {v:'explorasi',l:'Masih dalam tahap eksplorasi',i:'🔍'},
+  ]},
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+let currentStep = 0;
+let answers = {};
+let identity = {};
+
+// ── NAVIGATION ─────────────────────────────────────────────────
+function showPhase(id) {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.getElementById('phase-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuestions() {
+  const name = document.getElementById('input-name').value.trim();
+  const biz  = document.getElementById('input-business').value.trim();
+  const wa   = document.getElementById('input-wa').value.trim();
+  const role = document.getElementById('input-role').value.trim();
+
+  if (!name || !biz || !wa) {
+    showToast('⚠️ Mohon isi Nama, Nama Bisnis, dan Nomor WA');
+    return;
+  }
+  identity = { name, business: biz, wa, role };
+  currentStep = 0;
+  answers = {};
+  renderQuestion();
+  showPhase('questions');
+}
+
+// ── QUESTION RENDERER ──────────────────────────────────────────
+function renderQuestion() {
+  const q = ALL_Q[currentStep];
+  const total = ALL_Q.length;
+  const sec = SECTIONS.find(s => s.num === q.sec);
+  const pct = ((currentStep) / total) * 100;
+
+  // Progress
+  document.getElementById('section-badge').textContent = `${sec.icon} Bagian ${sec.num} — ${sec.title}`;
+  document.getElementById('progress-count').textContent = `${currentStep + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = Math.max(pct, 4) + '%';
+
+  // Question text
+  document.getElementById('q-title').textContent = q.q;
+  const subEl = document.getElementById('q-sub');
+  subEl.textContent = q.sub || '';
+  subEl.style.display = q.sub ? 'block' : 'none';
+
+  const hintEl = document.getElementById('q-multi-hint');
+  hintEl.style.display = q.type === 'multi' ? 'block' : 'none';
+
+  // Options
+  const list = document.getElementById('options-list');
+  const curr = answers[q.id] ?? (q.type === 'multi' ? [] : null);
+  list.innerHTML = '';
+
+  q.opts.forEach(opt => {
+    const isSelected = q.type === 'multi'
+      ? (Array.isArray(curr) && curr.includes(opt.v))
+      : curr === opt.v;
+
+    const card = document.createElement('div');
+    card.className = 'option-card' + (isSelected ? ' selected' : '');
+    card.innerHTML = `
+      <div class="option-check ${q.type === 'multi' ? 'square' : 'circle'}">${isSelected ? '✓' : ''}</div>
+      <span class="option-icon">${opt.i}</span>
+      <span class="option-label">${opt.l}</span>
+    `;
+    card.addEventListener('click', () => selectOption(opt.v));
+    list.appendChild(card);
+  });
+
+  // Nav buttons
+  document.getElementById('btn-back').style.display = currentStep > 0 ? 'block' : 'none';
+  updateNextBtn();
+
+  // Last question label
+  const btnNext = document.getElementById('btn-next');
+  btnNext.textContent = currentStep === total - 1 ? 'Lihat Laporan AI Saya →' : 'Lanjut →';
+}
+
+function selectOption(val) {
+  const q = ALL_Q[currentStep];
+  if (q.type === 'multi') {
+    const curr = Array.isArray(answers[q.id]) ? [...answers[q.id]] : [];
+    answers[q.id] = curr.includes(val) ? curr.filter(v => v !== val) : [...curr, val];
+  } else {
+    answers[q.id] = val;
+  }
+  renderQuestion();
+}
+
+function updateNextBtn() {
+  const q = ALL_Q[currentStep];
+  const curr = answers[q.id];
+  const canNext = q.type === 'multi'
+    ? Array.isArray(curr) && curr.length > 0
+    : curr !== null && curr !== undefined;
+  document.getElementById('btn-next').disabled = !canNext;
+}
+
+function nextQ() {
+  if (currentStep < ALL_Q.length - 1) {
+    currentStep++;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  } else {
+    generateReport();
+  }
+}
+
+function prevQ() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ── REPORT GENERATION ──────────────────────────────────────────
+async function generateReport() {
+  showPhase('analyzing');
+
+  const prompt = buildPrompt();
+
+  try {
+    const raw = await callClaude(prompt);
+    const clean = raw.replace(/```json\s*/i, '').replace(/```/g, '').trim();
+    const report = JSON.parse(clean);
+    renderReport(report);
+    saveToSheets(report);
+  } catch(e) {
+    console.error('Report error:', e);
+    renderReport(fallbackReport());
+    saveToSheets(fallbackReport());
+  }
+}
+
+function buildPrompt() {
+  const a = answers;
+  return `Data Assessment Business AI Checkup:
+
+IDENTITAS:
+- Nama: ${identity.name}
+- Bisnis: ${identity.business}
+- Jabatan: ${identity.role || 'Owner/Pemilik'}
+
+PROFIL BISNIS:
+- Industri: ${a.industry}
+- Model bisnis: ${a.biz_model}
+- Omzet/bulan: Rp ${a.revenue} juta
+- Karyawan: ${a.employees}
+- Channel penjualan: ${(a.channels||[]).join(', ')}
+
+MAPPING OPERASIONAL:
+- Proses yang berjalan: ${(a.processes||[]).join(', ')}
+
+BOTTLENECK WAKTU:
+- Aktivitas paling menyita waktu: ${(a.time_wasters||[]).join(', ')}
+- Proses yang paling menghambat: ${(a.bottleneck_process||[]).join(', ')}
+
+BOTTLENECK BIAYA:
+- Divisi biaya terbesar: ${(a.cost_divisi||[]).join(', ')}
+- Biaya CS & Admin/bulan: Rp ${a.cost_cs} juta
+- Biaya Marketing & Konten/bulan: Rp ${a.cost_marketing} juta
+- Minat implementasi AI: ${a.ai_interest}
+
+PAIN POINT:
+- Frustrasi terbesar: ${(a.frustrations||[]).join(', ')}
+- Ingin otomasi: ${(a.automation_wish||[]).join(', ')}
+
+AI READINESS:
+- Pengalaman AI: ${a.ai_exp}
+- Tools saat ini: ${(a.current_tools||[]).join(', ')}
+
+TARGET DAMPAK:
+- Target profit: ${a.profit_target}
+- Timeline: ${a.timeline}
+
+Hasilkan AI Efficiency Report yang sangat spesifik, berbasis data di atas, realistis untuk bisnis Indonesia.
+Output HANYA JSON valid:
+{
+  "score": <0-100>,
+  "score_label": "<Pemula/Berkembang/Siap Transformasi/Advanced>",
+  "headline": "<judul laporan spesifik max 12 kata>",
+  "executive_summary": "<ringkasan 3 kalimat formal berbasis data>",
+  "wasted_time": {
+    "hours_per_week": "<jam/minggu>",
+    "hours_per_month": "<jam/bulan>",
+    "equivalent_salary": "<setara berapa karyawan fulltime>",
+    "biggest_time_waster": "<aktivitas terbesar>"
+  },
+  "cost_analysis": {
+    "monthly_inefficiency": "<Rp X juta/bulan>",
+    "annual_inefficiency": "<Rp X juta/tahun>",
+    "saving_30pct": "<penghematan 30%>",
+    "saving_50pct": "<penghematan 50%>"
+  },
+  "bottlenecks": [
+    {"area":"<nama>","severity":"<Kritis/Signifikan/Perlu Perhatian>","situation":"<kondisi saat ini>","impact":"<dampak bisnis>","time_impact":"<waktu terbuang>"}
+  ],
+  "automation": [
+    {"title":"<nama solusi>","priority":"<Prioritas Tinggi/Sedang/Rendah>","description":"<deskripsi>","time_saving":"<hemat waktu>","cost_saving":"<hemat biaya>","duration":"<waktu implementasi>"}
+  ],
+  "projection": {
+    "conservative": "<+X%>",
+    "moderate": "<+X%>",
+    "optimistic": "<+X%>",
+    "roi": "<payback period>"
+  },
+  "recommendation": "<rekomendasi 3-4 kalimat profesional dan actionable>"
+}`;
+}
+
+async function callClaude(prompt) {
+  const res = await fetch('/api/checkup-analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('API error: ' + err);
+  }
+
+  const data = await res.json();
+  return data.text || '';
+}
+
+// ── SAVE TO SHEETS ─────────────────────────────────────────────
+async function saveToSheets(report) {
+  try {
+    await fetch('/api/checkup-append', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: identity.name,
+        business: identity.business,
+        wa: identity.wa,
+        role: identity.role || '',
+        score: report.score,
+        score_label: report.score_label,
+        industry: answers.industry || '',
+        biz_model: answers.biz_model || '',
+        revenue: answers.revenue || '',
+        employees: answers.employees || '',
+        ai_interest: answers.ai_interest || '',
+        ai_exp: answers.ai_exp || '',
+        timeline: answers.timeline || '',
+        automation_wish: (answers.automation_wish || []).join(', '),
+        bottlenecks: (report.bottlenecks || []).map(b => b.area).join(', '),
+        monthly_inefficiency: report.cost_analysis?.monthly_inefficiency || '',
+        time_wasted: report.wasted_time?.hours_per_month || '',
+        recommendation: report.recommendation || '',
+      })
+    });
+  } catch(e) {
+    console.log('Sheets save skipped (no API route):', e.message);
+  }
+}
+
+// ── RENDER REPORT ──────────────────────────────────────────────
+function renderReport(r) {
+  const sc = r.score >= 70 ? 'var(--green)' : r.score >= 40 ? 'var(--orange)' : 'var(--red)';
+  const scBg = r.score >= 70 ? 'var(--green-light)' : r.score >= 40 ? 'var(--orange-light)' : 'var(--red-light)';
+
+  const circ = 2 * Math.PI * 52;
+  const offset = circ - (r.score / 100) * circ;
+
+  const waMsg = encodeURIComponent(`Halo Integrate, saya ${identity.name} dari ${identity.business} baru menyelesaikan Business AI Checkup. Skor saya ${r.score}/100 (${r.score_label}). Ingin mendiskusikan implementasi AI untuk bisnis saya.`);
+
+  const sevColor = (s) => {
+    if (s === 'Kritis' || s === 'Prioritas Tinggi') return { bg: 'var(--red-light)', c: 'var(--red)' };
+    if (s === 'Signifikan' || s === 'Prioritas Sedang') return { bg: 'var(--orange-light)', c: 'var(--orange)' };
+    return { bg: 'var(--blue-mid)', c: 'var(--blue)' };
+  };
+
+  const html = `
+    <!-- Score -->
+    <div class="report-card score-center">
+      <div class="section-title-sm">AI Readiness Score</div>
+      <div class="score-ring-wrap">
+        <svg width="130" height="130">
+          <circle cx="65" cy="65" r="52" fill="none" stroke="var(--bg3)" stroke-width="9"/>
+          <circle cx="65" cy="65" r="52" fill="none" stroke="${sc}" stroke-width="9"
+            stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+            style="transition:stroke-dashoffset 1.5s ease"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-num" style="color:${sc}">${r.score}</div>
+          <div class="score-denom">/100</div>
+        </div>
+      </div>
+      <div class="score-label-badge" style="background:${scBg};color:${sc}">${r.score_label}</div>
+      <h2 class="score-headline">${r.headline}</h2>
+      <p class="score-summary">${r.executive_summary}</p>
+    </div>
+
+    <!-- Time + Cost -->
+    <div class="two-col">
+      <div class="report-card">
+        <div class="section-title-sm">⏱️ Estimasi Waktu Terbuang</div>
+        <div class="stat-row"><span class="stat-label">Per minggu</span><span class="stat-val" style="color:var(--red)">${r.wasted_time?.hours_per_week || '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Per bulan</span><span class="stat-val" style="color:var(--red)">${r.wasted_time?.hours_per_month || '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Setara dengan</span><span class="stat-val" style="color:var(--orange)">${r.wasted_time?.equivalent_salary || '—'}</span></div>
+        <div class="highlight-box" style="background:var(--red-light);color:var(--red)">
+          <strong>Aktivitas terbesar:</strong><br>${r.wasted_time?.biggest_time_waster || '—'}
+        </div>
+      </div>
+      <div class="report-card">
+        <div class="section-title-sm">💰 Analisis Biaya Inefisiensi</div>
+        <div class="stat-row"><span class="stat-label">Inefisiensi/bulan</span><span class="stat-val" style="color:var(--red)">${r.cost_analysis?.monthly_inefficiency || '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Inefisiensi/tahun</span><span class="stat-val" style="color:var(--red)">${r.cost_analysis?.annual_inefficiency || '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Hemat dengan AI 30%</span><span class="stat-val" style="color:var(--green)">${r.cost_analysis?.saving_30pct || '—'}</span></div>
+        <div class="stat-row"><span class="stat-label">Hemat dengan AI 50%</span><span class="stat-val" style="color:var(--green)">${r.cost_analysis?.saving_50pct || '—'}</span></div>
+      </div>
+    </div>
+
+    <!-- Bottlenecks -->
+    ${r.bottlenecks?.length ? `
+    <div class="report-card">
+      <div class="section-title-sm">🚧 Bottleneck yang Teridentifikasi</div>
+      ${r.bottlenecks.map(b => {
+        const s = sevColor(b.severity);
+        return `
+        <div class="bottleneck-item">
+          <div class="bottleneck-top">
+            <span class="bottleneck-area">${b.area}</span>
+            <span class="severity-badge" style="background:${s.bg};color:${s.c}">${b.severity}</span>
+          </div>
+          <p class="bottleneck-desc">${b.situation}</p>
+          <div class="bottleneck-meta">
+            <span style="color:var(--red)">⚡ ${b.impact}</span>
+            <span style="color:var(--text3)">⏱ ${b.time_impact}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <!-- Automation -->
+    ${r.automation?.length ? `
+    <div class="report-card">
+      <div class="section-title-sm">🤖 Peluang Otomasi AI</div>
+      ${r.automation.map((o, i) => {
+        const s = sevColor(o.priority);
+        return `
+        <div class="auto-item">
+          <div class="auto-num">${i+1}</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:6px">
+              <span class="auto-title">${o.title}</span>
+              <span class="severity-badge" style="background:${s.bg};color:${s.c}">${o.priority}</span>
+            </div>
+            <p class="auto-desc">${o.description}</p>
+            <div class="auto-meta">
+              <span style="color:var(--green)">⏱ Hemat: ${o.time_saving}</span>
+              <span style="color:var(--green)">💰 ${o.cost_saving}</span>
+              <span style="color:var(--text3)">🔧 ${o.duration}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <!-- Projection -->
+    ${r.projection ? `
+    <div class="report-card">
+      <div class="section-title-sm">📈 Proyeksi Peningkatan Profit</div>
+      <div class="proj-grid">
+        <div class="proj-item">
+          <div class="proj-label">Konservatif</div>
+          <div class="proj-val" style="color:var(--blue)">${r.projection.conservative}</div>
+        </div>
+        <div class="proj-item">
+          <div class="proj-label">Moderat</div>
+          <div class="proj-val" style="color:var(--orange)">${r.projection.moderate}</div>
+        </div>
+        <div class="proj-item">
+          <div class="proj-label">Optimistis</div>
+          <div class="proj-val" style="color:var(--green)">${r.projection.optimistic}</div>
+        </div>
+      </div>
+      <div class="highlight-box" style="background:var(--blue-light);color:var(--blue)">
+        🎯 Estimasi ROI: <strong>${r.projection.roi}</strong>
+      </div>
+    </div>` : ''}
+
+    <!-- Recommendation -->
+    <div class="rec-card">
+      <div class="rec-label">Rekomendasi Konsultan</div>
+      <p class="rec-text">${r.recommendation}</p>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-card">
+      <div style="font-size:22px;margin-bottom:12px">💬</div>
+      <h3 class="cta-title">Siap mengimplementasikan AI di bisnis Anda?</h3>
+      <p class="cta-sub">
+        Tim Integrate siap membantu Anda mengintegrasikan solusi AI secara tepat sasaran dan terukur.<br>
+        <strong>Konsultasi pertama gratis</strong>, tanpa kewajiban apapun.
+      </p>
+      <a href="https://wa.me/${WA_NUMBER}?text=${waMsg}" target="_blank" class="btn-wa">
+        💬 Diskusikan Hasil Saya via WhatsApp
+      </a>
+      <p class="cta-note">Respons dalam 1 jam di hari kerja · Senin–Jumat 09.00–18.00 WIB</p>
+    </div>
+  `;
+
+  document.getElementById('report-inner').innerHTML = html;
+  showPhase('report');
+}
+
+function fallbackReport() {
+  return {
+    score: 55, score_label: 'Berkembang',
+    headline: 'Bisnis Anda memiliki potensi efisiensi yang signifikan',
+    executive_summary: 'Berdasarkan assessment, terdapat beberapa bottleneck operasional yang dapat dioptimalkan melalui integrasi AI untuk meningkatkan efisiensi dan profitabilitas bisnis Anda secara signifikan.',
+    wasted_time: { hours_per_week: '25–35 jam', hours_per_month: '100–140 jam', equivalent_salary: '1–2 karyawan fulltime', biggest_time_waster: 'Proses manual dan repetitif' },
+    cost_analysis: { monthly_inefficiency: 'Rp 8–15 juta', annual_inefficiency: 'Rp 96–180 juta', saving_30pct: 'Rp 2.5–4.5 juta/bulan', saving_50pct: 'Rp 4–7.5 juta/bulan' },
+    bottlenecks: [],
+    automation: [],
+    projection: { conservative: '+10–15%', moderate: '+20–35%', optimistic: '+40–60%', roi: '2–4 bulan' },
+    recommendation: 'Kami merekomendasikan untuk memulai dengan mengotomasi proses yang paling repetitif terlebih dahulu, kemudian secara bertahap mengintegrasikan solusi AI ke area lainnya untuk hasil yang optimal dan terukur.'
+  };
+}
+
+// ── TOAST ──────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+
+</body>
+</html>

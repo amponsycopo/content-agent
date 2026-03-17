@@ -23,8 +23,8 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-6', // Opus — paling kuat untuk konten berkualitas tinggi
-        max_tokens: 1500,
+        model: 'claude-sonnet-4-6', // Sonnet — kualitas tinggi, 10x lebih hemat dari Opus
+        max_tokens: 4000,           // Dinaikkan agar JSON tidak terpotong
         messages: [{ role: 'user', content: prompt }]
       })
     });

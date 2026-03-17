@@ -14,7 +14,15 @@ export default async function handler(req, res) {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'API key not configured' });
 
-  const SYSTEM = `Kamu adalah konsultan transformasi digital senior yang spesialis dalam implementasi AI untuk bisnis Indonesia. Analisis data assessment bisnis yang diberikan dan hasilkan laporan AI Efficiency Report yang komprehensif, formal, berbasis data, dan sangat spesifik untuk konteks bisnis Indonesia. Semua estimasi harus realistis dan relevan.`;
+  const SYSTEM = `Kamu adalah konsultan transformasi digital senior spesialis implementasi AI untuk bisnis Indonesia.
+
+INSTRUKSI PENTING:
+- Output HANYA berupa JSON valid, tidak ada teks lain SAMA SEKALI
+- Jangan tambahkan kalimat pembuka, penutup, atau penjelasan apapun
+- Jangan gunakan markdown code fence (backtick)
+- Langsung mulai dengan karakter { dan akhiri dengan }
+- Semua estimasi harus realistis untuk konteks bisnis Indonesia
+- Gunakan bahasa Indonesia yang formal dan profesional`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {

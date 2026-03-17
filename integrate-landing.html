@@ -1320,5 +1320,38 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
 </script>
 
+
+<!-- Portfolio Modal -->
+<div class="portfolio-modal" id="portfolio-modal" style="display:none;" onclick="handleModalBgClick(event)">
+  <div class="portfolio-modal-inner" id="modal-inner">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-emoji" id="modal-emoji">⚡</div>
+        <div>
+          <div class="modal-title" id="modal-title">Portfolio</div>
+          <div class="modal-sub" id="modal-sub">Integrate.asia</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closePortfolioModal()">✕</button>
+    </div>
+    <div class="modal-screenshot" id="modal-screenshot-wrap">
+      <img id="modal-screenshot" src="" alt="App Screenshot" loading="lazy" />
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="modal-features" id="modal-features"></div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <div class="modal-cta">
+        <a href="https://wa.me/6285161165654" target="_blank" style="background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(26,86,219,0.3);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+          💬 Minta Demo Live
+        </a>
+        <a href="https://wa.me/6285161165654" target="_blank" style="background:transparent;border:1.5px solid var(--border);color:var(--text);padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+          📋 Tanya Harga
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

@@ -1383,9 +1383,40 @@ function saveVoice() {
   if (style) localStorage.setItem('voice_style', style);
   if (values) localStorage.setItem('voice_values', values);
   if (refs) localStorage.setItem('voice_refs', refs);
-  if (examples) localStorage.setItem('voice_examples', examples);
+  if (examples !== undefined) localStorage.setItem('voice_examples', examples);
   showToast('✅ Brand voice tersimpan!');
 }
+
+// ── Load saved voice into form on page load ──
+function loadVoice() {
+  var style    = localStorage.getItem('voice_style');
+  var values   = localStorage.getItem('voice_values');
+  var refs     = localStorage.getItem('voice_refs');
+  var examples = localStorage.getItem('voice_examples');
+
+  if (style)    { var el = document.getElementById('voice-style');    if (el) el.value = style; }
+  if (values)   { var el = document.getElementById('voice-values');   if (el) el.value = values; }
+  if (refs)     { var el = document.getElementById('voice-refs');     if (el) el.value = refs; }
+  if (examples !== null) { var el = document.getElementById('voice-examples'); if (el) el.value = examples; }
+
+  // Update sidebar voice card display
+  if (style) {
+    var card = document.querySelector('.voice-card .voice-text');
+    if (card) card.textContent = style.substring(0, 80) + (style.length > 80 ? '...' : '');
+  }
+  if (refs) {
+    var tagsEl = document.querySelector('.voice-card div:last-child');
+    if (tagsEl) {
+      var refList = refs.split(',').map(function(r) { return r.trim(); }).filter(Boolean);
+      tagsEl.innerHTML = refList.map(function(r) {
+        return '<span class="voice-tag">' + r + '</span>';
+      }).join('');
+    }
+  }
+}
+
+// Load voice when DOM is ready
+document.addEventListener('DOMContentLoaded', loadVoice);
 
 // ── Copy ──
 function copyContent(btn, text) {
@@ -1521,285 +1552,315 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── CAROUSEL GENERATOR ──────────────────────────────────────────
 
-const CAROUSEL_THEMES = {
-  integrate: { name: 'Integrate Blue', bg: '#1a56db', card: '#ffffff', accent: '#1a56db', accentLight: '#eff4ff', text: '#0f172a', subtext: '#475569', border: '#e2e8f0', numBg: '#1a56db', numText: '#ffffff', white: '#ffffff' },
-  dark:      { name: 'Dark Pro', bg: '#0a0a0a', card: '#111111', accent: '#1a56db', accentLight: '#1e3a5f', text: '#f0f0f0', subtext: '#888888', border: '#222222', numBg: '#1a56db', numText: '#ffffff', white: '#ffffff' },
-  light:     { name: 'Clean White', bg: '#f8fafc', card: '#ffffff', accent: '#1a56db', accentLight: '#eff4ff', text: '#0f172a', subtext: '#64748b', border: '#e2e8f0', numBg: '#1a56db', numText: '#ffffff', white: '#ffffff' },
-  bold:      { name: 'Bold Navy', bg: '#0f172a', card: '#1e293b', accent: '#3b82f6', accentLight: '#1e3a5f', text: '#f1f5f9', subtext: '#94a3b8', border: '#334155', numBg: '#3b82f6', numText: '#ffffff', white: '#ffffff' },
-};
+// ── CAROUSEL GENERATOR (HTML → html2canvas) ────────────────────
 
-let _carouselData = null;
-let _currentTheme = 'integrate';
-let _canvases = [];
+var _carouselData = null;
+var _currentStyle = 'combo';
+var _slideElements = [];
+
+var CAROUSEL_STYLES = {
+  combo: 'Kombinasi (Default)',
+  alldark: 'Full Dark Premium',
+  allwhite: 'Full Clean White',
+};
 
 function openCarouselGenerator(data) {
   if (!data || !data.slides || !data.slides.length) { showToast('❗ Generate Instagram dulu!'); return; }
   _carouselData = data;
-  _currentTheme = 'integrate';
+  _currentStyle = 'combo';
 
-  const modal = document.createElement('div');
+  var modal = document.createElement('div');
   modal.className = 'carousel-modal';
   modal.id = 'carousel-modal';
 
-  const themes = Object.entries(CAROUSEL_THEMES).map(([key, t]) =>
-    '<button class="theme-chip ' + (key === 'integrate' ? 'active' : '') + '" onclick="setCarouselTheme(\'' + key + '\', this)">' + t.name + '</button>'
-  ).join('');
+  var styleOpts = '';
+  Object.entries(CAROUSEL_STYLES).forEach(function(e) {
+    var isActive = e[0] === 'combo' ? ' active' : '';
+    styleOpts += '<button class="theme-chip' + isActive + '" data-style="' + e[0] + '" onclick="setCarouselStyle(this.dataset.style, this)">' + e[1] + '</button>';
+  });
 
   modal.innerHTML = '<div class="carousel-modal-inner">' +
     '<div class="carousel-modal-header">' +
-      '<div class="carousel-modal-title">🖼️ Carousel PNG Generator</div>' +
+      '<div class="carousel-modal-title">🖼️ Carousel Generator</div>' +
       '<button class="carousel-close-btn" onclick="closeCarouselModal()">✕ Tutup</button>' +
     '</div>' +
-    '<div><div class="carousel-control-label">Pilih Tema</div>' +
-    '<div class="carousel-theme-row" id="theme-chips">' + themes + '</div></div>' +
+    '<div><div class="carousel-control-label" style="margin-bottom:8px;">Style</div>' +
+    '<div class="carousel-theme-row" id="theme-chips">' + styleOpts + '</div></div>' +
+    '<div style="font-size:12px;color:var(--text3);padding:8px 12px;background:var(--surface2);border-radius:8px;">⏳ Klik <strong style="color:var(--accent)">Render & Download</strong> untuk generate PNG berkualitas tinggi</div>' +
     '<div id="carousel-slides-grid" class="carousel-slides-grid"></div>' +
     '<div class="carousel-actions">' +
-      '<button class="carousel-dl-btn" onclick="downloadAllSlides(false)">⬇️ Download Semua (ZIP)</button>' +
-      '<button class="carousel-dl-btn secondary" onclick="downloadAllSlides(true)">⬇️ Satu per Satu</button>' +
+      '<button class="carousel-dl-btn" id="btn-render-dl" onclick="renderAndDownloadAll()">✨ Render & Download ZIP</button>' +
+      '<button class="carousel-dl-btn secondary" onclick="renderAndDownloadAll(true)">✨ Render Satu per Satu</button>' +
     '</div>' +
-    '<div style="font-size:12px;color:var(--text3);line-height:1.6;">💡 Klik slide untuk download 1 file. Ukuran: <strong style="color:var(--text2);">1080×1080px</strong> siap upload Instagram.</div>' +
+    '<div style="font-size:11px;color:var(--text3);line-height:1.6;">💡 Ukuran: 1080×1080px · Font premium · Siap upload Instagram</div>' +
     '</div>';
 
   document.body.appendChild(modal);
   modal.addEventListener('click', function(e) { if (e.target === modal) closeCarouselModal(); });
-  renderAllCarouselSlides();
+  renderSlidesPreviews();
 }
 
 function closeCarouselModal() {
-  const m = document.getElementById('carousel-modal');
+  // Remove hidden render container if exists
+  var rc = document.getElementById('carousel-render-container');
+  if (rc) rc.remove();
+  var m = document.getElementById('carousel-modal');
   if (m) m.remove();
-  _canvases = [];
+  _slideElements = [];
 }
 
-function setCarouselTheme(key, btn) {
-  _currentTheme = key;
+function setCarouselStyle(key, btn) {
+  _currentStyle = key;
   document.querySelectorAll('.theme-chip').forEach(function(c) { c.classList.remove('active'); });
   btn.classList.add('active');
-  renderAllCarouselSlides();
+  renderSlidesPreviews();
 }
 
-function renderAllCarouselSlides() {
-  const grid = document.getElementById('carousel-slides-grid');
+// ── Build slide HTML ────────────────────────────────────────────
+function buildSlideHTML(slide, idx, total, style, size) {
+  var isDark = style === 'alldark' || (style === 'combo' && idx === 0);
+  var s = size || 1080;
+  var scale = s / 1080;
+
+  if (isDark) {
+    // DARK SLIDE — gradient premium like slide 1
+    return '<div style="' +
+      'width:' + s + 'px;height:' + s + 'px;' +
+      'background: radial-gradient(ellipse at 30% 40%, #1e3a8a 0%, #0f172a 50%, #020617 100%);' +
+      'display:flex;flex-direction:column;justify-content:center;align-items:flex-start;' +
+      'padding:' + Math.round(100*scale) + 'px ' + Math.round(90*scale) + 'px;' +
+      'box-sizing:border-box;position:relative;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;">' +
+      // Glow orb top-left
+      '<div style="position:absolute;top:-80px;left:-80px;width:400px;height:400px;' +
+        'background:radial-gradient(circle,rgba(59,130,246,0.25) 0%,transparent 70%);pointer-events:none;"></div>' +
+      // Glow orb bottom-right
+      '<div style="position:absolute;bottom:-60px;right:-60px;width:300px;height:300px;' +
+        'background:radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%);pointer-events:none;"></div>' +
+      // Category label
+      '<div style="' +
+        'font-size:' + Math.round(18*scale) + 'px;font-weight:700;letter-spacing:3px;' +
+        'text-transform:uppercase;color:rgba(147,197,253,0.8);margin-bottom:' + Math.round(32*scale) + 'px;' +
+        'position:relative;z-index:2;">' +
+        (slide.category || 'Untuk Bisnis Indonesia') +
+      '</div>' +
+      // Main title
+      '<div style="' +
+        'font-size:' + Math.round((slide.title.length > 30 ? 72 : 86)*scale) + 'px;' +
+        'font-weight:900;line-height:1.1;color:#ffffff;' +
+        'margin-bottom:' + Math.round(32*scale) + 'px;' +
+        'position:relative;z-index:2;letter-spacing:-2px;">' +
+        slide.title.replace(/(\w+)/g, function(w, i) {
+          // Make first meaningful word accent colored
+          return w;
+        }) +
+      '</div>' +
+      // Divider
+      '<div style="width:' + Math.round(80*scale) + 'px;height:' + Math.round(4*scale) + 'px;' +
+        'background:linear-gradient(90deg,#3b82f6,#6366f1);' +
+        'border-radius:99px;margin-bottom:' + Math.round(28*scale) + 'px;' +
+        'position:relative;z-index:2;"></div>' +
+      // Subtitle/content
+      '<div style="' +
+        'font-size:' + Math.round(28*scale) + 'px;line-height:1.65;' +
+        'color:rgba(203,213,225,0.85);max-width:' + Math.round(820*scale) + 'px;' +
+        'position:relative;z-index:2;">' +
+        slide.content +
+      '</div>' +
+      // Bottom counter
+      '<div style="' +
+        'position:absolute;bottom:' + Math.round(52*scale) + 'px;right:' + Math.round(72*scale) + 'px;' +
+        'font-size:' + Math.round(22*scale) + 'px;font-weight:600;' +
+        'color:rgba(148,163,184,0.6);z-index:2;">' +
+        (slide.num || idx+1) + ' / ' + total +
+      '</div>' +
+    '</div>';
+  } else {
+    // WHITE SLIDE — clean card style like slide 2
+    var contentItems = slide.content.split('\n').concat(slide.content.split('→')).map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 3; });
+    var hasItems = contentItems.length > 1;
+
+    return '<div style="' +
+      'width:' + s + 'px;height:' + s + 'px;' +
+      'background:#ffffff;' +
+      'display:flex;flex-direction:column;justify-content:flex-start;' +
+      'padding:' + Math.round(80*scale) + 'px ' + Math.round(80*scale) + 'px ' + Math.round(72*scale) + 'px;' +
+      'box-sizing:border-box;position:relative;font-family:system-ui,-apple-system,sans-serif;">' +
+      // Top category badge
+      '<div style="' +
+        'display:inline-flex;align-items:center;gap:8px;' +
+        'background:#fff1f2;border-radius:99px;' +
+        'padding:' + Math.round(8*scale) + 'px ' + Math.round(18*scale) + 'px;' +
+        'margin-bottom:' + Math.round(36*scale) + 'px;width:fit-content;">' +
+        '<span style="font-size:' + Math.round(22*scale) + 'px;">😟</span>' +
+        '<span style="font-size:' + Math.round(18*scale) + 'px;font-weight:700;color:#e11d48;">' +
+          (slide.category || 'Realita Bisnis Anda') +
+        '</span>' +
+      '</div>' +
+      // Main title — with red accent on last word
+      '<div style="font-size:' + Math.round((slide.title.length > 30 ? 62 : 74)*scale) + 'px;' +
+        'font-weight:900;line-height:1.15;color:#0f172a;' +
+        'margin-bottom:' + Math.round(44*scale) + 'px;letter-spacing:-1.5px;">' +
+        slide.title +
+      '</div>' +
+      // Content — cards or paragraph
+      (hasItems ?
+        contentItems.slice(0, 3).map(function(item, i) {
+          var icons = ['📊', '💸', '👤', '⏰', '📋', '🔄'];
+          return '<div style="' +
+            'display:flex;align-items:flex-start;gap:' + Math.round(20*scale) + 'px;' +
+            'background:#fff5f5;border-radius:' + Math.round(16*scale) + 'px;' +
+            'padding:' + Math.round(24*scale) + 'px ' + Math.round(28*scale) + 'px;' +
+            'margin-bottom:' + Math.round(16*scale) + 'px;' +
+            'border-left:' + Math.round(5*scale) + 'px solid #ef4444;">' +
+            '<span style="font-size:' + Math.round(36*scale) + 'px;flex-shrink:0;">' + icons[i % icons.length] + '</span>' +
+            '<span style="font-size:' + Math.round(26*scale) + 'px;color:#334155;line-height:1.55;font-weight:500;">' + item + '</span>' +
+          '</div>';
+        }).join('')
+      :
+        '<div style="' +
+          'background:#f8fafc;border-radius:' + Math.round(16*scale) + 'px;' +
+          'padding:' + Math.round(32*scale) + 'px;' +
+          'border-left:' + Math.round(5*scale) + 'px solid #1a56db;">' +
+          '<div style="font-size:' + Math.round(28*scale) + 'px;color:#475569;line-height:1.7;">' +
+            slide.content +
+          '</div>' +
+        '</div>'
+      ) +
+      // Bottom: brand + counter
+      '<div style="position:absolute;bottom:' + Math.round(48*scale) + 'px;left:' + Math.round(80*scale) + 'px;right:' + Math.round(80*scale) + 'px;' +
+        'display:flex;justify-content:space-between;align-items:center;">' +
+        '<div style="display:flex;align-items:center;gap:' + Math.round(8*scale) + 'px;">' +
+          '<div style="width:' + Math.round(10*scale) + 'px;height:' + Math.round(10*scale) + 'px;' +
+            'background:#1a56db;border-radius:50%;"></div>' +
+          '<span style="font-size:' + Math.round(20*scale) + 'px;font-weight:700;color:#1a56db;">integrate.asia</span>' +
+        '</div>' +
+        '<span style="font-size:' + Math.round(20*scale) + 'px;color:#94a3b8;font-weight:600;">' +
+          (idx < total - 1 ? 'swipe → ' : '') +
+          (slide.num || idx+1) + ' / ' + total +
+        '</span>' +
+      '</div>' +
+    '</div>';
+  }
+}
+
+// ── Preview ─────────────────────────────────────────────────────
+function renderSlidesPreviews() {
+  var grid = document.getElementById('carousel-slides-grid');
   if (!grid || !_carouselData) return;
-  const slides = _carouselData.slides || [];
-  _canvases = [];
+  var slides = _carouselData.slides || [];
   grid.innerHTML = '';
+  _slideElements = [];
 
   slides.forEach(function(slide, idx) {
-    const wrapper = document.createElement('div');
+    var wrapper = document.createElement('div');
     wrapper.className = 'carousel-slide-preview';
+    wrapper.style.cssText = 'cursor:default;border:1px solid var(--border2);border-radius:8px;overflow:hidden;position:relative;';
 
-    const badge = document.createElement('div');
+    var badge = document.createElement('div');
     badge.className = 'carousel-slide-badge';
     badge.textContent = 'Slide ' + (slide.num || idx + 1);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080; canvas.height = 1080;
-    drawSlide(canvas, slide, idx, slides.length);
-    _canvases.push({ canvas: canvas, slide: slide });
-    canvas.addEventListener('click', (function(c, s) { return function() { downloadSingleSlide(c, s.num || 1); }; })(canvas, slide));
+    // Preview at 25% size
+    var previewWrap = document.createElement('div');
+    previewWrap.style.cssText = 'width:100%;aspect-ratio:1;overflow:hidden;position:relative;';
 
-    wrapper.appendChild(canvas);
+    var inner = document.createElement('div');
+    inner.style.cssText = 'transform:scale(0.25);transform-origin:top left;width:400%;height:400%;pointer-events:none;';
+    inner.innerHTML = buildSlideHTML(slide, idx, slides.length, _currentStyle, 1080);
+
+    previewWrap.appendChild(inner);
+    wrapper.appendChild(previewWrap);
     wrapper.appendChild(badge);
     grid.appendChild(wrapper);
+    _slideElements.push({ slide: slide, idx: idx });
   });
 }
 
-function drawSlide(canvas, slide, idx, total) {
-  const ctx = canvas.getContext('2d');
-  const W = 1080, H = 1080;
-  const t = CAROUSEL_THEMES[_currentTheme];
+// ── Render & Download ───────────────────────────────────────────
+async function renderAndDownloadAll(oneByOne) {
+  var slides = _carouselData && _carouselData.slides;
+  if (!slides || !slides.length) return;
 
-  // ── Background ──
-  ctx.fillStyle = t.bg;
-  ctx.fillRect(0, 0, W, H);
+  var btn = document.getElementById('btn-render-dl');
+  if (btn) { btn.textContent = '⏳ Rendering...'; btn.disabled = true; }
+  showToast('⏳ Rendering slides...');
 
-  // Subtle dot pattern on background
-  ctx.fillStyle = t.white;
-  ctx.globalAlpha = 0.06;
-  for (let x = 40; x < W; x += 60) {
-    for (let y = 40; y < H; y += 60) {
-      ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI*2); ctx.fill();
-    }
-  }
-  ctx.globalAlpha = 1;
-
-  // ── Main white card ──
-  const m = 48;
-  ctx.fillStyle = t.card;
-  ctx.shadowColor = 'rgba(0,0,0,0.15)';
-  ctx.shadowBlur = 40;
-  ctx.shadowOffsetY = 8;
-  drawRoundRect(ctx, m, m, W-m*2, H-m*2, 32);
-  ctx.fill();
-  ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-
-  // ── Top accent bar (full width) ──
-  ctx.fillStyle = t.accent;
-  drawRoundRect(ctx, m, m, W-m*2, 12, {tl:32,tr:32,br:0,bl:0});
-  ctx.fill();
-
-  const px = m + 60;
-  const pw = W - (m+60)*2;
-  let curY = m + 80;
-
-  // ── Slide counter pill ──
-  const pillW = 110, pillH = 40;
-  ctx.fillStyle = t.accentLight;
-  drawRoundRect(ctx, px, curY, pillW, pillH, 20);
-  ctx.fill();
-  ctx.fillStyle = t.accent;
-  ctx.font = 'bold 18px system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText((slide.num || idx+1) + ' / ' + total, px + pillW/2, curY + 27);
-  ctx.textAlign = 'left';
-  curY += pillH + 36;
-
-  // ── Title ──
-  const tSize = slide.title.length > 40 ? 52 : slide.title.length > 25 ? 60 : 68;
-  ctx.fillStyle = t.text;
-  ctx.font = '800 ' + tSize + 'px system-ui, sans-serif';
-  const tH = wrapCanvasText(ctx, slide.title, px, curY, pw, tSize * 1.3);
-  curY += tH + 28;
-
-  // ── Blue divider line ──
-  ctx.fillStyle = t.accent;
-  ctx.fillRect(px, curY, 72, 5);
-  curY += 36;
-
-  // ── Content card (highlight box) ──
-  const contentLines = splitIntoLines(ctx, slide.content, pw - 64, '400 28px system-ui, sans-serif');
-  const cardPadV = 28, cardPadH = 32;
-  const lineH = 44;
-  const cardH = contentLines.length * lineH + cardPadV * 2;
-
-  // Card background
-  ctx.fillStyle = t.accentLight;
-  drawRoundRect(ctx, px, curY, pw, cardH, 16);
-  ctx.fill();
-
-  // Left accent strip inside card
-  ctx.fillStyle = t.accent;
-  drawRoundRect(ctx, px, curY, 6, cardH, {tl:16,tr:0,br:0,bl:16});
-  ctx.fill();
-
-  // Card text
-  ctx.fillStyle = t.subtext;
-  ctx.font = '400 28px system-ui, sans-serif';
-  contentLines.forEach(function(line, i) {
-    ctx.fillText(line, px + cardPadH + 14, curY + cardPadV + (i * lineH) + 28);
-  });
-  curY += cardH;
-
-  // ── Bottom bar ──
-  const barY = H - m - 72;
-
-  // Bottom separator
-  ctx.strokeStyle = t.border;
-  ctx.lineWidth = 1.5;
-  ctx.globalAlpha = 0.6;
-  ctx.beginPath(); ctx.moveTo(px, barY); ctx.lineTo(px+pw, barY); ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  // Logo dot + brand name
-  ctx.fillStyle = t.accent;
-  ctx.beginPath(); ctx.arc(px + 10, barY + 30, 8, 0, Math.PI*2); ctx.fill();
-  ctx.font = 'bold 24px system-ui, sans-serif';
-  ctx.fillStyle = t.accent;
-  ctx.fillText('integrate.asia', px + 26, barY + 38);
-
-  // Swipe hint
-  if (idx < total - 1) {
-    ctx.fillStyle = t.subtext;
-    ctx.font = '400 20px system-ui, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('swipe →', px + pw, barY + 38);
-  }
-  ctx.textAlign = 'left';
-}
-
-// Helper: split text into lines that fit maxW
-function splitIntoLines(ctx, text, maxW, font) {
-  ctx.font = font;
-  var words = text.split(' ');
-  var lines = [];
-  var line = '';
-  for (var i = 0; i < words.length; i++) {
-    var test = line ? line + ' ' + words[i] : words[i];
-    if (ctx.measureText(test).width > maxW && line) {
-      lines.push(line);
-      line = words[i];
-      if (lines.length >= 6) { lines[lines.length-1] += '...'; break; }
-    } else { line = test; }
-  }
-  if (line && lines.length < 6) lines.push(line);
-  return lines;
-}
-
-function drawRoundRect(ctx, x, y, w, h, r) {
-  if (typeof r === 'number') r = {tl:r,tr:r,br:r,bl:r};
-  ctx.beginPath();
-  ctx.moveTo(x+r.tl, y);
-  ctx.lineTo(x+w-r.tr, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r.tr);
-  ctx.lineTo(x+w, y+h-r.br); ctx.quadraticCurveTo(x+w, y+h, x+w-r.br, y+h);
-  ctx.lineTo(x+r.bl, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r.bl);
-  ctx.lineTo(x, y+r.tl); ctx.quadraticCurveTo(x, y, x+r.tl, y);
-  ctx.closePath();
-}
-
-function wrapCanvasText(ctx, text, x, y, maxW, lineH) {
-  const words = text.split(' ');
-  let line = '', curY = y;
-  for (let i = 0; i < words.length; i++) {
-    const test = line ? line + ' ' + words[i] : words[i];
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line, x, curY);
-      line = words[i]; curY += lineH;
-      if (curY > 980) { ctx.fillText(line+'...', x, curY); return curY - y; }
-    } else { line = test; }
-  }
-  if (line) ctx.fillText(line, x, curY);
-  return curY - y + lineH;
-}
-
-function downloadSingleSlide(canvas, num) {
-  const a = document.createElement('a');
-  a.download = 'slide-' + String(num).padStart(2,'0') + '.png';
-  a.href = canvas.toDataURL('image/png');
-  a.click();
-  showToast('✅ Slide ' + num + ' didownload!');
-}
-
-async function downloadAllSlides(oneByOne) {
-  if (!_canvases.length) return;
-  if (oneByOne) {
-    for (let i = 0; i < _canvases.length; i++) {
-      downloadSingleSlide(_canvases[i].canvas, _canvases[i].slide.num || i+1);
-      await new Promise(function(r) { setTimeout(r, 350); });
-    }
-    showToast('✅ Semua slide didownload!');
-    return;
-  }
-  if (typeof JSZip === 'undefined') {
+  // Load html2canvas if not available
+  if (typeof html2canvas === 'undefined') {
     await new Promise(function(res, rej) {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
       s.onload = res; s.onerror = rej;
       document.head.appendChild(s);
     });
   }
-  const zip = new JSZip();
-  const folder = zip.folder('carousel-slides');
-  for (let i = 0; i < _canvases.length; i++) {
-    const b64 = _canvases[i].canvas.toDataURL('image/png').split(',')[1];
-    folder.file('slide-' + String(_canvases[i].slide.num || i+1).padStart(2,'0') + '.png', b64, {base64:true});
+
+  // Create hidden render container
+  var rc = document.createElement('div');
+  rc.id = 'carousel-render-container';
+  rc.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;';
+  document.body.appendChild(rc);
+
+  var pngBlobs = [];
+
+  for (var i = 0; i < slides.length; i++) {
+    var slide = slides[i];
+    var div = document.createElement('div');
+    div.innerHTML = buildSlideHTML(slide, i, slides.length, _currentStyle, 1080);
+    var el = div.firstChild;
+    rc.appendChild(el);
+
+    try {
+      var canvas = await html2canvas(el, {
+        width: 1080, height: 1080,
+        scale: 1,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+      });
+
+      if (oneByOne) {
+        var a = document.createElement('a');
+        a.download = 'slide-' + String(slide.num || i+1).padStart(2,'0') + '.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+        await new Promise(function(r) { setTimeout(r, 400); });
+      } else {
+        pngBlobs.push({ canvas: canvas, num: slide.num || i+1 });
+      }
+    } catch(e) {
+      console.error('Render error slide', i, e);
+    }
+
+    rc.innerHTML = '';
   }
-  const blob = await zip.generateAsync({type:'blob'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'carousel-slides.zip'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('✅ ZIP berhasil didownload!');
+
+  rc.remove();
+
+  if (!oneByOne && pngBlobs.length) {
+    // ZIP download
+    if (typeof JSZip === 'undefined') {
+      await new Promise(function(res, rej) {
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    var zip = new JSZip();
+    var folder = zip.folder('carousel-slides');
+    pngBlobs.forEach(function(p) {
+      folder.file('slide-' + String(p.num).padStart(2,'0') + '.png', p.canvas.toDataURL('image/png').split(',')[1], {base64:true});
+    });
+    var blob = await zip.generateAsync({type:'blob'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'carousel-slides.zip'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  if (btn) { btn.textContent = '✨ Render & Download ZIP'; btn.disabled = false; }
+  showToast('✅ ' + slides.length + ' slide berhasil didownload!');
 }
 
 // ── Toast ──

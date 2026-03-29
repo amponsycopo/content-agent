@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Business Accelerator Workshop – Integrate.asia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white: #ffffff;
+    --off-white: #f8f7f4;
+    --light: #f0ede8;
+    --border: #e2ddd8;
+    --text: #1a1814;
+    --muted: #7a7570;
+    --accent: #1a1814;
+    --gold: #b8935a;
+    --gold-light: #f5ede0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAVBAR */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-logo span {
+    color: var(--gold);
+  }
+
+  .nav-cta {
+    background: var(--text);
+    color: var(--white);
+    padding: 10px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .nav-cta:hover { background: var(--gold); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 64px;
+  }
+
+  .hero-left {
+    padding: 80px 60px 80px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--white);
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 40px;
+    max-width: 480px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .hero-meta-item strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .meta-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--gold-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--text);
+    color: var(--white);
+    padding: 18px 36px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    width: fit-content;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(184,147,90,0.3);
+  }
+
+  .btn-price {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .price-strike {
+    text-decoration: line-through;
+    color: var(--border);
+  }
+
+  .price-main {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .hero-right {
+    background: var(--off-white);
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.8s 0.3s ease both;
+  }
+
+  .hero-right::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(184,147,90,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    padding: 28px 24px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-number span {
+    color: var(--gold);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .presenter-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .presenter-avatar {
+    width: 56px;
+    height: 56px;
+    background: var(--gold-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .presenter-info h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .presenter-info p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* SECTION BASE */
+  section {
+    padding: 100px 80px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+
+  .section-desc {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* PROBLEM */
+  .problem {
+    background: var(--text);
+    color: var(--white);
+    padding: 100px 80px;
+  }
+
+  .problem .section-label { color: var(--gold); }
+
+  .problem .section-title { color: var(--white); }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 60px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  .problem-item {
+    padding: 40px 36px;
+    background: var(--text);
+    border-top: 3px solid transparent;
+    transition: border-color 0.3s;
+  }
+
+  .problem-item:hover { border-color: var(--gold); }
+
+  .problem-icon {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  .problem-item h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--white);
+  }
+
+  .problem-item p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
+  }
+
+  /* MODULES */
+  .modules {
+    background: var(--off-white);
+    padding: 100px 80px;
+  }
+
+  .modules-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 60px;
+  }
+
+  .module-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .module-item {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 0;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+
+  .module-item:hover {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 32px 36px;
+    cursor: pointer;
+  }
+
+  .module-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 72px;
+  }
+
+  .module-title-wrap { flex: 1; }
+
+  .module-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .module-focus {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .module-toggle {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .module-body {
+    display: none;
+    padding: 0 36px 32px 132px;
+    border-top: 1px solid var(--border);
+  }
+
+  .module-body.open { display: block; }
+
+  .module-toggle.open { background: var(--gold); color: var(--white); border-color: var(--gold); }
+
+  .module-learnings {
+    list-style: none;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .module-learnings li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .module-learnings li::before {
+    content: '→';
+    color: var(--gold);
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .module-outcome {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--gold-light);
+    border-left: 3px solid var(--gold);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .module-outcome strong { color: var(--gold); }
+
+  /* HANDS ON */
+  .handson {
+    padding: 100px 80px;
+    background: var(--white);
+  }
+
+  .handson-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: var(--border);
+  }
+
+  .handson-item {
+    background: var(--white);
+    padding: 40px 36px;
+  }
+
+  .handson-tag {
+    display: inline-block;
+    background: var(--gold-light);
+    color: var(--gold);
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .handson-item h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .handson-item p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* BONUSES */
+  .bonuses {
+    background: var(--off-white);
+    padding: 100px 80px;
+  }
+
+  .bonus-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+    background: var(--border);
+  }
+
+  .bonus-item {
+    background: var(--white);
+    padding: 36px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bonus-icon {
+    font-size: 26px;
+  }
+
+  .bonus-item h4 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .bonus-item p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .bonus-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+
+  /* PRICING */
+  .pricing {
+    padding: 100px 80px;
+    background: var(--white);
+  }
+
+  .pricing-inner {
+    max-width: 640px;
+    margin: 60px auto 0;
+  }
+
+  .pricing-card {
+    border: 2px solid var(--text);
+    padding: 56px;
+    text-align: center;
+    position: relative;
+  }
+
+  .pricing-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--white);
+    padding: 4px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .pricing-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .pricing-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .pricing-amount sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    vertical-align: baseline;
+  }
+
+  .pricing-note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  .pricing-features {
+    list-style: none;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 40px;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pricing-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+  }
+
+  .pricing-features li::before {
+    content: '✓';
+    color: var(--gold);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .btn-register {
+    display: block;
+    background: var(--text);
+    color: var(--white);
+    padding: 20px 40px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    text-align: center;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-register:hover {
+    background: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(184,147,90,0.3);
+  }
+
+  .pricing-guarantee {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* FAQ */
+  .faq {
+    background: var(--off-white);
+    padding: 100px 80px;
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 60px;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+  }
+
+  .faq-item h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .faq-item p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* FOOTER CTA */
+  .footer-cta {
+    background: var(--text);
+    color: var(--white);
+    padding: 100px 80px;
+    text-align: center;
+  }
+
+  .footer-cta .section-title {
+    color: var(--white);
+    font-size: 48px;
+    margin: 0 auto 16px;
+    max-width: 600px;
+  }
+
+  .footer-cta .section-desc {
+    color: rgba(255,255,255,0.5);
+    margin: 0 auto 48px;
+  }
+
+  .footer-cta .btn-primary {
+    margin: 0 auto;
+    background: var(--gold);
+    font-size: 16px;
+    padding: 20px 48px;
+  }
+
+  .footer-cta .btn-primary:hover {
+    background: var(--white);
+    color: var(--text);
+  }
+
+  /* FOOTER */
+  footer {
+    background: #111;
+    padding: 32px 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  footer p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.3);
+  }
+
+  footer a {
+    font-size: 13px;
+    color: rgba(255,255,255,0.3);
+    text-decoration: none;
+  }
+
+  footer a:hover { color: var(--gold); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 60px 32px; }
+    .hero-title { font-size: 40px; }
+    section, .problem, .modules, .handson, .bonuses, .pricing, .faq, .footer-cta { padding: 60px 32px; }
+    .problem-grid, .handson-grid, .bonus-grid { grid-template-columns: 1fr; }
+    .faq-grid { grid-template-columns: 1fr; }
+    .module-body { padding: 0 24px 24px; }
+    .pricing-card { padding: 40px 28px; }
+    footer { flex-direction: column; gap: 8px; text-align: center; padding: 24px 32px; }
+    nav { padding: 0 24px; }
+    .modules-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Integrate<span>.asia</span></a>
+  <a class="nav-cta" href="#daftar">Daftar Sekarang</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">Workshop Online · Terbatas 30 Peserta</div>
+    <h1 class="hero-title">AI Business<br><em>Accelerator</em></h1>
+    <p class="hero-subtitle">Lipat gandakan profit dan output tim Anda tanpa menambah karyawan — dalam satu hari pelatihan.</p>
+
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="meta-icon">📅</div>
+        <span><strong>Segera hadir</strong> · Online via Zoom</span>
+      </div>
+      <div class="hero-meta-item">
+        <div class="meta-icon">⏱️</div>
+        <span><strong>2 Jam</strong> · Padat & Langsung Praktek</span>
+      </div>
+      <div class="hero-meta-item">
+        <div class="meta-icon">🎯</div>
+        <span><strong>Untuk pemilik bisnis & tim</strong> · Semua industri</span>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <a href="#daftar" class="btn-primary">
+        Daftar Workshop →
+      </a>
+      <div class="btn-price">
+        <span class="price-strike">Rp 499.000</span>
+        <span>→</span>
+        <span class="price-main">Rp 199.000</span>
+        <span style="color: var(--border)">·</span>
+        <span>Early Bird</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">15<span>jam</span></div>
+        <div class="stat-label">Hemat per minggu</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number"><span>Rp</span>15jt</div>
+        <div class="stat-label">Efisiensi per bulan</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">30<span>x</span></div>
+        <div class="stat-label">Output konten lebih banyak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4<span> modul</span></div>
+        <div class="stat-label">Praktek langsung</div>
+      </div>
+    </div>
+
+    <div class="presenter-card">
+      <div class="presenter-avatar">E</div>
+      <div class="presenter-info">
+        <h4>Erlando</h4>
+        <p>Co-Founder, Integrate.asia · AI Business Consultant</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<div class="problem reveal">
+  <div class="section-label">Apakah Anda mengalami ini?</div>
+  <h2 class="section-title">Tim Anda Bekerja Keras,<br>Hasilnya Belum Maksimal</h2>
+
+  <div class="problem-grid">
+    <div class="problem-item">
+      <div class="problem-icon">⏳</div>
+      <h3>Waktu Habis untuk Tugas Repetitif</h3>
+      <p>Notulensi, email, laporan, dan konten memakan 60% waktu kerja tim — padahal semuanya bisa diotomasi.</p>
+    </div>
+    <div class="problem-item">
+      <div class="problem-icon">💸</div>
+      <h3>Biaya Operasional Terus Membengkak</h3>
+      <p>Tambah karyawan untuk tambah kapasitas. Padahal ada cara lebih efisien untuk melipatgandakan output tanpa menambah beban gaji.</p>
+    </div>
+    <div class="problem-item">
+      <div class="problem-icon">🤖</div>
+      <h3>Sudah Coba AI, Hasilnya Biasa Saja</h3>
+      <p>Banyak yang sudah mencoba ChatGPT namun hasilnya generik. Masalahnya bukan pada AI-nya — melainkan cara berkomunikasi dengan AI.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODULES -->
+<div class="modules reveal">
+  <div class="modules-header">
+    <div>
+      <div class="section-label">Kurikulum Workshop</div>
+      <h2 class="section-title">4 Modul, 2 Jam,<br>Hasil Nyata</h2>
+    </div>
+    <p class="section-desc" style="max-width:300px; font-size:15px;">Setiap modul dirancang dengan sesi hands-on — peserta langsung mencoba, bukan sekadar menonton.</p>
+  </div>
+
+  <div class="module-list">
+
+    <div class="module-item">
+      <div class="module-header" onclick="toggleModule(this)">
+        <div class="module-number">Modul 01</div>
+        <div class="module-title-wrap">
+          <div class="module-title">The Prompt Engineering Blueprint</div>
+          <div class="module-focus">Cara berkomunikasi dengan AI agar hasilnya tidak generik</div>
+        </div>
+        <div class="module-toggle">+</div>
+      </div>
+      <div class="module-body open">
+        <ul class="module-learnings">
+          <li>Framework C-T-B-F: Konteks, Tugas, Batasan, dan Format Output — fondasi setiap prompt yang efektif</li>
+          <li>Persona Setting: mengubah AI menjadi konsultan bisnis atau staf ahli sesuai kebutuhan</li>
+          <li>Iterative Prompting: teknik fine-tuning jawaban AI hingga menghasilkan output optimal</li>
+          <li>Praktek langsung: peserta membuat prompt untuk bisnis mereka sendiri</li>
+        </ul>
+        <div class="module-outcome"><strong>Outcome:</strong> Tim dapat memperoleh jawaban akurat dan relevan hanya dalam satu kali permintaan.</div>
+      </div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header" onclick="toggleModule(this)">
+        <div class="module-number">Modul 02</div>
+        <div class="module-title-wrap">
+          <div class="module-title">AI for Operations & Admin</div>
+          <div class="module-focus">Efisiensi 10x lipat pada tugas harian dan administrasi</div>
+        </div>
+        <div class="module-toggle">+</div>
+      </div>
+      <div class="module-body">
+        <ul class="module-learnings">
+          <li>Instant Meeting Minutes: menghasilkan notulensi rapi dalam 5 menit, bukan 45 menit</li>
+          <li>Data Processing: menganalisis dan membersihkan data Excel dalam hitungan detik</li>
+          <li>Smart Drafting: membuat email, SOP, dan laporan tanpa writer's block</li>
+          <li>AI untuk Presentasi: membangun deck, narasi, dan simulasi Q&A dengan AI</li>
+        </ul>
+        <div class="module-outcome"><strong>Outcome:</strong> Hemat 3–4 jam kerja per hari untuk setiap anggota tim operasional.</div>
+      </div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header" onclick="toggleModule(this)">
+        <div class="module-number">Modul 03</div>
+        <div class="module-title-wrap">
+          <div class="module-title">AI for Marketing & Sales</div>
+          <div class="module-focus">Membangun mesin konten dan strategi penjualan berbasis AI</div>
+        </div>
+        <div class="module-toggle">+</div>
+      </div>
+      <div class="module-body">
+        <ul class="module-learnings">
+          <li>Content Factory: mengubah 1 ide menjadi 30 konten untuk TikTok, Instagram, dan LinkedIn</li>
+          <li>Psychology-Based Copywriting: menulis iklan yang menyentuh pain point pelanggan secara tepat</li>
+          <li>Competitor Analysis: menganalisis strategi kompetitor secara menyeluruh dalam 30 menit</li>
+          <li>AI Sales Assistant: membangun asisten follow-up otomatis via WhatsApp</li>
+        </ul>
+        <div class="module-outcome"><strong>Outcome:</strong> Tim marketing lebih produktif tanpa bergantung pada agensi eksternal yang mahal.</div>
+      </div>
+    </div>
+
+    <div class="module-item">
+      <div class="module-header" onclick="toggleModule(this)">
+        <div class="module-number">Modul 04</div>
+        <div class="module-title-wrap">
+          <div class="module-title">The AI Arsenal</div>
+          <div class="module-focus">Memilih tools AI yang tepat untuk setiap jenis pekerjaan</div>
+        </div>
+        <div class="module-toggle">+</div>
+      </div>
+      <div class="module-body">
+        <ul class="module-learnings">
+          <li>Claude: untuk analisis mendalam, penulisan strategis, dan pemrosesan dokumen kompleks</li>
+          <li>Perplexity: untuk riset data real-time, fact-checking, dan intelijen kompetitor</li>
+          <li>Tools Visual AI: untuk produksi aset kreatif, video, dan konten visual berkualitas tinggi</li>
+          <li>Workflow kombinasi: menggabungkan beberapa AI untuk hasil yang tidak bisa dicapai oleh satu tools saja</li>
+        </ul>
+        <div class="module-outcome"><strong>Outcome:</strong> Tim memiliki standar penggunaan tools AI sesuai spesialisasi masing-masing.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- HANDS ON -->
+<div class="handson reveal">
+  <div class="section-label">Sesi Praktek Langsung</div>
+  <h2 class="section-title">Buka HP Anda,<br>Coba Sekarang</h2>
+  <p class="section-desc">Setiap peserta akan langsung mempraktikkan materi menggunakan bisnis mereka sendiri — bukan studi kasus fiktif.</p>
+
+  <div class="handson-grid">
+    <div class="handson-item">
+      <div class="handson-tag">Praktek 1</div>
+      <h3>Notulensi Meeting Instan</h3>
+      <p>Presenter mensimulasikan meeting selama 3 menit. Peserta mencatat seadanya, lalu menggunakan AI untuk menghasilkan notulensi lengkap dengan action items dalam waktu kurang dari 5 menit.</p>
+    </div>
+    <div class="handson-item">
+      <div class="handson-tag">Praktek 2</div>
+      <h3>Balas Pesan Sulit via WhatsApp</h3>
+      <p>Peserta membawa situasi nyata — komplain pelanggan, follow-up yang tertunda, atau negosiasi yang rumit — dan langsung mendapat draft balasan profesional.</p>
+    </div>
+    <div class="handson-item">
+      <div class="handson-tag">Praktek 3</div>
+      <h3>Content Plan 30 Hari</h3>
+      <p>Dalam 10 menit, setiap peserta menghasilkan rencana konten satu bulan penuh untuk bisnis mereka sendiri, lengkap dengan hook dan call-to-action.</p>
+    </div>
+    <div class="handson-item">
+      <div class="handson-tag">Praktek 4</div>
+      <h3>AI Sales Assistant WhatsApp</h3>
+      <p>Peserta membangun "Sales Brain" personal — sebuah sistem prompt yang dapat langsung digunakan untuk merespons setiap chat pelanggan dengan cara yang paling mungkin menghasilkan konversi.</p>
+    </div>
+  </div>
+</div>
+
+<!-- BONUSES -->
+<div class="bonuses reveal">
+  <div style="text-align: center; margin-bottom: 0;">
+    <div class="section-label">Yang Anda Dapatkan</div>
+    <h2 class="section-title">Workshop + Bonus Eksklusif</h2>
+    <p class="section-desc" style="margin: 0 auto;">Seluruh materi dirancang agar dapat langsung diimplementasikan mulai hari berikutnya.</p>
+  </div>
+
+  <div class="bonus-grid" style="margin-top: 60px;">
+    <div class="bonus-item">
+      <div class="bonus-icon">📄</div>
+      <h4>PDF Cheat Sheet</h4>
+      <p>20 prompt siap pakai untuk operasional, marketing, dan sales — tinggal sesuaikan dengan bisnis Anda.</p>
+      <div class="bonus-value">Senilai Rp 150.000</div>
+    </div>
+    <div class="bonus-item">
+      <div class="bonus-icon">🤖</div>
+      <h4>Template Sales Brain</h4>
+      <p>Template sistem prompt untuk asisten sales WhatsApp yang dapat dikonfigurasi dalam 10 menit.</p>
+      <div class="bonus-value">Senilai Rp 200.000</div>
+    </div>
+    <div class="bonus-item">
+      <div class="bonus-icon">📅</div>
+      <h4>Content Calendar Template</h4>
+      <p>Template content plan bulanan yang sudah terintegrasi dengan framework AI — siap digunakan langsung.</p>
+      <div class="bonus-value">Senilai Rp 100.000</div>
+    </div>
+    <div class="bonus-item">
+      <div class="bonus-icon">🎬</div>
+      <h4>Rekaman Workshop</h4>
+      <p>Akses rekaman video workshop selama 30 hari untuk meninjau kembali materi yang ingin diperdalam.</p>
+      <div class="bonus-value">Senilai Rp 199.000</div>
+    </div>
+    <div class="bonus-item">
+      <div class="bonus-icon">💬</div>
+      <h4>Grup WhatsApp 30 Hari</h4>
+      <p>Akses grup eksklusif peserta untuk tanya jawab, berbagi hasil implementasi, dan update materi terbaru.</p>
+      <div class="bonus-value">Senilai Rp 250.000</div>
+    </div>
+    <div class="bonus-item">
+      <div class="bonus-icon">⚡</div>
+      <h4>Framework Decision Tools</h4>
+      <p>Panduan visual untuk memilih tools AI yang tepat untuk setiap jenis tugas bisnis — cetak dan tempel di meja kerja.</p>
+      <div class="bonus-value">Senilai Rp 75.000</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing reveal" id="daftar">
+  <div style="text-align: center;">
+    <div class="section-label">Investasi</div>
+    <h2 class="section-title">Satu Harga, Nilai Berlipat</h2>
+    <p class="section-desc" style="margin: 0 auto;">Jika satu peserta berhasil menghemat 10 jam kerja per minggu, investasi ini kembali dalam satu hari pertama implementasi.</p>
+  </div>
+
+  <div class="pricing-inner">
+    <div class="pricing-card">
+      <div class="pricing-badge">Early Bird · Terbatas 30 Seat</div>
+      <div class="pricing-name">AI Business Accelerator Workshop</div>
+      <div class="pricing-amount"><sub>Rp </sub>199.000</div>
+      <div class="pricing-note">Harga normal Rp 499.000 · Hemat Rp 300.000</div>
+
+      <ul class="pricing-features">
+        <li>Workshop 2 jam via Zoom (sesi live interaktif)</li>
+        <li>4 Modul lengkap dengan sesi praktek langsung</li>
+        <li>PDF Cheat Sheet: 20 Prompt Siap Pakai</li>
+        <li>Template Sales Brain WhatsApp</li>
+        <li>Content Calendar Template 1 Bulan</li>
+        <li>Rekaman workshop akses 30 hari</li>
+        <li>Grup WhatsApp eksklusif peserta 30 hari</li>
+        <li>Framework Decision Tools (printable)</li>
+      </ul>
+
+      <a href="https://wa.me/628XXXXXXXXXX?text=Halo,%20saya%20ingin%20mendaftar%20AI%20Business%20Accelerator%20Workshop" class="btn-register" target="_blank">
+        Daftar via WhatsApp →
+      </a>
+      <p class="pricing-guarantee">🔒 Pembayaran aman · Konfirmasi dalam 24 jam</p>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq reveal">
+  <div class="section-label">Pertanyaan Umum</div>
+  <h2 class="section-title">Yang Sering Ditanyakan</h2>
+
+  <div class="faq-grid">
+    <div class="faq-item">
+      <h4>Apakah perlu keahlian teknis atau coding?</h4>
+      <p>Tidak sama sekali. Workshop ini dirancang untuk pemilik bisnis dan tim yang belum pernah menggunakan AI sebelumnya. Seluruh tools yang digunakan gratis dan dapat diakses langsung dari browser.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Industri apa yang cocok mengikuti workshop ini?</h4>
+      <p>Semua industri. Framework yang diajarkan bersifat universal dan telah dipraktikkan di F&B, retail, jasa konsultasi, e-commerce, dan berbagai sektor lainnya.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Apakah ada rekaman jika tidak bisa hadir live?</h4>
+      <p>Rekaman tersedia dan dapat diakses selama 30 hari setelah workshop berlangsung. Namun kami sangat menyarankan kehadiran live untuk memaksimalkan sesi praktek dan tanya jawab.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Berapa kapasitas peserta dalam satu sesi?</h4>
+      <p>Maksimal 30 peserta per sesi untuk memastikan setiap peserta mendapat perhatian yang memadai selama sesi praktek berlangsung.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Tools apa yang perlu disiapkan sebelumnya?</h4>
+      <p>Cukup siapkan HP atau laptop dengan koneksi internet. Semua tools yang digunakan dapat diakses gratis melalui browser — tidak ada yang perlu diunduh atau dibeli sebelumnya.</p>
+    </div>
+    <div class="faq-item">
+      <h4>Apakah materi dapat langsung diterapkan setelah workshop?</h4>
+      <p>Ya. Seluruh materi dirancang untuk langsung dapat diimplementasikan. Peserta akan pulang dengan prompt siap pakai, template, dan sistem yang dapat langsung digunakan keesokan harinya.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER CTA -->
+<div class="footer-cta reveal">
+  <div class="section-label">Ambil Keputusan Sekarang</div>
+  <h2 class="section-title">Mulai Sebelum Kompetitor Anda</h2>
+  <p class="section-desc">Bisnis yang paling cepat beradaptasi bukan yang terbesar — melainkan yang paling lincah. Seat terbatas.</p>
+  <a href="#daftar" class="btn-primary">Amankan Seat Anda →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Integrate.asia · All rights reserved</p>
+  <a href="https://integrate.asia" target="_blank">integrate.asia</a>
+</footer>
+
+<script>
+  // Accordion modules
+  function toggleModule(header) {
+    const body = header.nextElementSibling;
+    const toggle = header.querySelector('.module-toggle');
+    const isOpen = body.classList.contains('open');
+
+    document.querySelectorAll('.module-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.module-toggle').forEach(t => {
+      t.classList.remove('open');
+      t.textContent = '+';
+    });
+
+    if (!isOpen) {
+      body.classList.add('open');
+      toggle.classList.add('open');
+      toggle.textContent = '−';
+    }
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

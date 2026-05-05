@@ -261,6 +261,35 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 .chip:hover { border-color: var(--border-bright); color: var(--text); }
 .chip.on { background: var(--gold); border-color: var(--gold); color: var(--bg); font-weight: 600; }
 
+/* MOODBOARD UPLOAD */
+.upload-zone {
+  border: 1px dashed var(--border-bright);
+  border-radius: 3px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface2);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover { border-color: var(--gold-dim); background: rgba(201,168,76,0.04); }
+.upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; padding: 0; border: none; background: none; }
+.upload-icon { font-size: 1.5rem; margin-bottom: 0.3rem; opacity: 0.4; }
+.upload-hint { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.05em; }
+.upload-hint span { color: var(--gold-dim); }
+.ref-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; margin-top: 0.75rem; }
+.ref-thumb { position: relative; aspect-ratio: 1; border-radius: 2px; overflow: hidden; border: 1px solid var(--border); background: var(--surface2); }
+.ref-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ref-thumb-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); font-size: 0.55rem; letter-spacing: 0.08em; color: var(--text-muted); padding: 0.2rem 0.3rem; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ref-thumb-remove { position: absolute; top: 3px; right: 3px; background: rgba(255,68,68,0.85); color: white; border: none; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; cursor: pointer; display: none; align-items: center; justify-content: center; line-height: 1; }
+.ref-thumb:hover .ref-thumb-remove { display: flex; }
+.analyze-btn { width: 100%; margin-top: 0.75rem; padding: 0.55rem; background: none; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+.analyze-btn:hover { background: rgba(201,168,76,0.1); }
+.analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.analyze-result { margin-top: 0.75rem; background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.15); border-radius: 2px; padding: 0.75rem; font-size: 0.7rem; line-height: 1.6; color: var(--text-muted); display: none; font-family: 'JetBrains Mono', monospace; }
+.analyze-result.show { display: block; }
+.analyze-result-label { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim); font-weight: 600; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.3rem; }
+
 /* PLATFORM CHIPS */
 .plat-chip {
   padding: 0.25rem 0.6rem;
@@ -795,6 +824,25 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
           <input type="text" id="photoRef" placeholder="e.g. Tyler Mitchell, Harley Weir" />
         </div>
 
+        <div class="field">
+          <label>Upload Visual Reference</label>
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="refFileInput" accept="image/*" multiple onchange="handleRefUpload(this.files)" />
+            <div class="upload-icon">⬆</div>
+            <div class="upload-hint">Drop gambar atau <span>klik untuk upload</span></div>
+            <div class="upload-hint" style="margin-top:0.2rem;opacity:0.6">Max 5 gambar · JPG, PNG, WEBP</div>
+          </div>
+          <div class="ref-grid" id="refGrid"></div>
+          <button class="analyze-btn" id="analyzeBtn" onclick="analyzeMoodboard()" disabled>
+            <span id="analyzeSpinner" style="display:none;width:12px;height:12px;border:2px solid rgba(201,168,76,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.6s linear infinite"></span>
+            ✦ Analyze with AI
+          </button>
+          <div class="analyze-result" id="analyzeResult">
+            <div class="analyze-result-label">✦ AI Visual Analysis</div>
+            <div id="analyzeResultText"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -823,6 +871,112 @@ textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
 <div class="toast" id="toast"></div>
 
 <script>
+// === REF IMAGE STORAGE ===
+let refImages = []; // [{base64, mediaType, name}]
+
+function handleRefUpload(files) {
+  const remaining = 5 - refImages.length;
+  const toLoad = Array.from(files).slice(0, remaining);
+  if (!toLoad.length) return showToast('Max 5 gambar referensi', 'error');
+
+  toLoad.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const base64 = e.target.result.split(',')[1];
+      const mediaType = file.type || 'image/jpeg';
+      refImages.push({ base64, mediaType, name: file.name });
+      renderRefGrid();
+      document.getElementById('analyzeBtn').disabled = refImages.length === 0;
+    };
+    reader.readAsDataURL(file);
+  });
+  // reset input so same file can be re-uploaded
+  document.getElementById('refFileInput').value = '';
+}
+
+function renderRefGrid() {
+  const grid = document.getElementById('refGrid');
+  grid.innerHTML = '';
+  refImages.forEach((img, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'ref-thumb';
+    thumb.innerHTML = `
+      <img src="data:${img.mediaType};base64,${img.base64}" alt="${img.name}" />
+      <div class="ref-thumb-label">${img.name.replace(/\.[^.]+$/, '')}</div>
+      <button class="ref-thumb-remove" onclick="removeRef(${i})">✕</button>
+    `;
+    grid.appendChild(thumb);
+  });
+  document.getElementById('analyzeBtn').disabled = refImages.length === 0;
+}
+
+function removeRef(i) {
+  refImages.splice(i, 1);
+  renderRefGrid();
+  if (refImages.length === 0) {
+    document.getElementById('analyzeResult').classList.remove('show');
+    document.getElementById('analyzeResultText').textContent = '';
+    window._moodboardAnalysis = '';
+  }
+}
+
+// Drag & drop support
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('uploadZone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    handleRefUpload(e.dataTransfer.files);
+  });
+});
+
+// === ANALYZE MOODBOARD ===
+async function analyzeMoodboard() {
+  if (refImages.length === 0) return;
+  const btn = document.getElementById('analyzeBtn');
+  const spinner = document.getElementById('analyzeSpinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  setStatus('Analyzing moodboard...', true);
+
+  // Build content array with all images
+  const content = refImages.map(img => ({
+    type: 'image',
+    source: { type: 'base64', media_type: img.mediaType, data: img.base64 }
+  }));
+  content.push({
+    type: 'text',
+    text: `Analyze these ${refImages.length} moodboard reference image(s) for a fashion campaign. Extract and summarize in 3-4 sentences: dominant color palette, mood/atmosphere, visual style, lighting characteristics, composition style, and any notable aesthetic direction. Be specific and actionable for a fashion photographer and AI art director. Keep it concise.`
+  });
+
+  try {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{ role: 'user', content }]
+      })
+    });
+    const data = await response.json();
+    const analysis = data.content?.map(c => c.text || '').join('') || '';
+    window._moodboardAnalysis = analysis;
+    document.getElementById('analyzeResultText').textContent = analysis;
+    document.getElementById('analyzeResult').classList.add('show');
+    showToast('Moodboard analyzed! ✦', 'success');
+  } catch(err) {
+    showToast('Analyze gagal. Coba lagi.', 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    setStatus('Ready', false);
+  }
+}
+
 // === SECTION TOGGLE ===
 function toggleSection(header) {
   const body = header.nextElementSibling;
@@ -913,10 +1067,11 @@ Visual Style: ${brief.styles}
 Location/Setting: ${brief.location || 'varied locations'}
 Photography Reference: ${brief.photoRef || 'contemporary editorial'}
 
+${window._moodboardAnalysis ? `\nMoodboard Visual Analysis (from uploaded references):\n${window._moodboardAnalysis}\n` : ''}
 Generate exactly ${brief.shotCount} shots. Make each shot unique, purposeful, and platform-aware. The AI prompts should be rich, cinematic, and ready for Midjourney or similar tools.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

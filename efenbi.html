@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>efenbi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0D11F2;
+      --navy: #07094A;
+      --offwhite: #F2F2EE;
+      --electric: #E8FF47;
+      --warm: #FF6B35;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      width: 100%;
+      background: var(--navy);
+      padding: 52px 28px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* grid texture overlay */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 52px;
+      position: relative;
+      z-index: 1;
+    }
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.8px;
+    }
+    .nav-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .eyebrow-dot {
+      width: 8px; height: 8px;
+      background: var(--electric);
+      border-radius: 50%;
+    }
+    .eyebrow-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--electric);
+    }
+
+    .hero-title {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1.05;
+      color: var(--white);
+      letter-spacing: -1.5px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 20px;
+    }
+    .hero-title .highlight {
+      color: var(--electric);
+      font-style: italic;
+    }
+    .hero-title .warm {
+      color: var(--warm);
+    }
+
+    .hero-sub {
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.7;
+      max-width: 300px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 32px;
+    }
+    .hero-sub strong {
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--electric);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 14px 20px 14px 24px;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(232,255,71,0.3);
+    }
+    .cta-arrow {
+      width: 30px; height: 30px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      color: var(--electric);
+    }
+
+    /* stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 0;
+      margin-top: 44px;
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 28px;
+    }
+    .stat {
+      flex: 1;
+      padding-right: 20px;
+    }
+    .stat + .stat {
+      padding-left: 20px;
+      padding-right: 0;
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--electric);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      width: 100%;
+      background: var(--offwhite);
+      border-radius: 28px 28px 0 0;
+      padding: 36px 22px 0;
+      margin-top: -24px;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+    .section-label::before {
+      content: '';
+      width: 16px; height: 3px;
+      background: var(--warm);
+      border-radius: 2px;
+    }
+
+    .section-title {
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.2;
+      letter-spacing: -0.6px;
+      margin-bottom: 20px;
+    }
+    .section-title u {
+      text-decoration-color: var(--warm);
+      text-underline-offset: 4px;
+      text-decoration-thickness: 3px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      border: 2px solid transparent;
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--blue);
+      box-shadow: 0 8px 24px rgba(7,9,74,0.1);
+    }
+    .card:hover .arrow-btn { transform: rotate(45deg); }
+
+    /* Course card — navy */
+    .card-navy {
+      background: var(--navy);
+      border-color: var(--navy);
+    }
+    .card-navy .card-title { color: var(--white); }
+    .card-navy .card-desc  { color: rgba(255,255,255,0.55); }
+    .card-navy:hover { border-color: var(--electric); }
+    .card-navy .arrow-btn { background: var(--electric); }
+    .card-navy .arrow-btn svg { stroke: var(--navy); }
+
+    /* KOL card — electric */
+    .card-electric {
+      background: var(--electric);
+      border-color: var(--electric);
+    }
+    .card-electric .card-title { color: var(--navy); }
+    .card-electric .card-desc  { color: rgba(7,9,74,0.6); }
+    .card-electric:hover { border-color: var(--blue); }
+    .card-electric .arrow-btn { background: var(--navy); }
+
+    .icon-box {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .ib-white   { background: rgba(255,255,255,0.12); }
+    .ib-navy    { background: rgba(7,9,74,0.08); }
+    .ib-warm    { background: rgba(255,107,53,0.1); }
+    .ib-elec    { background: rgba(232,255,71,0.5); }
+
+    .card-body { flex: 1; min-width: 0; }
+    .card-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.2px;
+      margin-bottom: 3px;
+    }
+    .card-desc {
+      font-size: 11.5px;
+      color: #6B7280;
+      line-height: 1.45;
+    }
+
+    .arrow-btn {
+      width: 34px; height: 34px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .arrow-btn svg {
+      width: 13px; height: 13px;
+      stroke: white; fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .badge {
+      position: absolute;
+      top: 13px; right: 58px;
+      background: var(--electric);
+      color: var(--navy);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(7,9,74,0.08);
+      margin: 24px 0;
+    }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      width: 100%;
+      background: var(--navy);
+      padding: 20px 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .marquee-wrap::before,
+    .marquee-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 48px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .marquee-wrap::before {
+      left: 0;
+      background: linear-gradient(to right, var(--navy), transparent);
+    }
+    .marquee-wrap::after {
+      right: 0;
+      background: linear-gradient(to left, var(--navy), transparent);
+    }
+    .marquee-inner {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      flex-wrap: nowrap;
+      min-width: max-content;
+      animation: marquee 30s linear infinite;
+      will-change: transform;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 100px;
+      padding: 8px 20px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
+      margin-right: 10px;
+      flex-shrink: 0;
+      letter-spacing: -0.2px;
+    }
+    .brand-pill.sep {
+      background: var(--warm);
+      border-color: var(--warm);
+      color: var(--white);
+      padding: 8px 12px;
+      font-size: 10px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      width: 100%;
+      background: var(--offwhite);
+      padding: 24px 22px 52px;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 11px;
+      color: #A0A0A0;
+      font-weight: 500;
+    }
+    .footer-text b { color: var(--navy); }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero  { animation: fadeUp 0.5s ease both; }
+    .main  { animation: fadeUp 0.5s 0.1s ease both; }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="nav">
+      <div class="nav-logo">efenbi</div>
+      <div class="nav-tag">est. 2024</div>
+    </div>
+
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      <span class="eyebrow-text">Marketing Partner · FnB Industry</span>
+    </div>
+
+    <div class="hero-title">
+      Bisnis FnB yang<br>
+      scale butuh <span class="highlight">sistem,</span><br>
+      bukan sekadar<br>
+      <span class="warm">konten.</span>
+    </div>
+
+    <p class="hero-sub">
+      Efenbi adalah marketing partner untuk brand FnB yang siap naik level.
+      <strong>Insightful, practical, dan actually works.</strong>
+    </p>
+
+    <a href="https://wa.me/" class="cta-btn">
+      Mulai dari sini
+      <span class="cta-arrow">→</span>
+    </a>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-num">600+</div>
+        <div class="stat-label">Bisnis FnB<br>dibantu</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">2jt</div>
+        <div class="stat-label">Omzet/hari<br>klien kami</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- COURSE -->
+    <div class="section-label">Course</div>
+    <div class="section-title">
+      Belajar dari yang<br><u>pernah di lapangan.</u>
+    </div>
+
+    <a href="#" class="card card-navy">
+      <div class="icon-box ib-white">🎯</div>
+      <div class="card-body">
+        <div class="card-title">How to Create Hero Product</div>
+        <div class="card-desc">Temuin satu produk yang bikin pelanggan kangen & bisnis lo tahan lama.</div>
+      </div>
+      <div class="badge">Soon</div>
+      <div class="arrow-btn">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </a>
+
+    <div class="divider"></div>
+
+    <!-- LAYANAN -->
+    <div class="section-label">Layanan</div>
+    <div class="section-title">
+      Lo fokus di dapur.<br><u>Gw yang urus marketingnya.</u>
+    </div>
+
+    <a href="#" class="card card-electric">
+      <div class="icon-box ib-elec">📢</div>
+      <div class="card-body">
+        <div class="card-title">KOL Management</div>
+        <div class="card-desc">Riset, outreach, brief, sampai report — semua gw handle.</div>
+      </div>
+      <div class="arrow-btn">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </a>
+
+    <a href="#" class="card">
+      <div class="icon-box ib-warm">📊</div>
+      <div class="card-body">
+        <div class="card-title">Meta Ads</div>
+        <div class="card-desc">Iklan yang actually convert — bukan cuma dapet like.</div>
+      </div>
+      <div class="arrow-btn">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </a>
+
+    <a href="#" class="card">
+      <div class="icon-box ib-navy">📦</div>
+      <div class="card-body">
+        <div class="card-title">KOL + Meta Ads</div>
+        <div class="card-desc">Paket lengkap — awareness dari KOL, konversi dari Ads.</div>
+      </div>
+      <div class="arrow-btn">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </a>
+
+    <!-- BRANDS SECTION HEADER -->
+    <div class="divider"></div>
+    <div class="section-label">Brands We've Worked With</div>
+    <div class="section-title">
+      Mereka udah<br><u>ngerasain bedanya.</u>
+    </div>
+
+  </div>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      <span class="brand-pill">🍜 Dapur Rasa</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">☕ Kopi Kampung</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍱 Warung Nusantara</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🧁 Manis Studio</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍗 Geprek Juara</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🥤 Segar Project</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍣 Umami Co.</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍞 Roti & Kopi</span>
+      <span class="brand-pill sep">✦</span>
+      <!-- duplicate for seamless loop -->
+      <span class="brand-pill">🍜 Dapur Rasa</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">☕ Kopi Kampung</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍱 Warung Nusantara</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🧁 Manis Studio</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍗 Geprek Juara</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🥤 Segar Project</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍣 Umami Co.</span>
+      <span class="brand-pill sep">✦</span>
+      <span class="brand-pill">🍞 Roti & Kopi</span>
+      <span class="brand-pill sep">✦</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">© 2024 <b>efenbi</b> · Insightful ideas. Measurable impact.</div>
+  </div>
+
+</body>
+</html>

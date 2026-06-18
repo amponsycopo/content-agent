@@ -312,6 +312,21 @@
     .about-photo { width: 200px; }
   }
 
+  /* COUNTDOWN */
+  .countdown-timer {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 700;
+    margin: 0 0 12px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    background: #dc2626;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-align: center;
+    display: block;
+  }
+
   /* PRICING */
   .pricing-box {
     max-width: 420px;
@@ -721,6 +736,7 @@ src="https://www.facebook.com/tr?id=1131772502456323&ev=PageView&noscript=1"
       <div class="price-strike">Rp499.000</div>
       <div class="price-main">Rp149.000</div>
       <div class="price-label">Harga spesial — akses seumur hidup</div>
+      <div id="countdown" class="countdown-timer">🔥 Promo berakhir dalam 23:59:59</div>
       <div style="text-align:left;margin:20px 0;">
         <p>✅ Sistem 5 Langkah</p>
         <p>✅ Bonus 30 Resep Rice Bowl</p>
@@ -907,6 +923,42 @@ function dismissNotif(){
 }
 setInterval(showNotif, 15000)
 setTimeout(showNotif, 3000)
+</script>
+
+<!-- ===== COUNTDOWN TIMER ===== -->
+<script>
+(function(){
+  var KEY = 'promo_deadline'
+  var DURATION = 24 * 60 * 60 * 1000 // 24 jam
+  var el = document.getElementById('countdown')
+  if(!el) return
+
+  var deadline = localStorage.getItem(KEY)
+  if(!deadline){
+    deadline = Date.now() + DURATION
+    localStorage.setItem(KEY, deadline)
+  }
+  deadline = parseInt(deadline)
+
+  function pad(n){ return n < 10 ? '0'+n : ''+n }
+
+  function tick(){
+    var jarak = deadline - Date.now()
+    if(jarak < 0){
+      el.textContent = '🔥 Promo telah berakhir'
+      el.style.background = '#9ca3af'
+      el.style.color = '#fff'
+      return
+    }
+    var h = Math.floor(jarak / 3600000)
+    var m = Math.floor((jarak % 3600000) / 60000)
+    var s = Math.floor((jarak % 60000) / 1000)
+    el.textContent = '🔥 Promo berakhir dalam '+pad(h)+':'+pad(m)+':'+pad(s)
+  }
+
+  tick()
+  setInterval(tick, 1000)
+})()
 </script>
 
 <!-- ===== FOOTER ===== -->

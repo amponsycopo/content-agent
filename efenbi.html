@@ -219,22 +219,33 @@
   .step-card p { color: #6b7280; font-size: 13px; line-height: 1.5; }
 
   /* WHAT YOU GET */
-  .wyg-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    max-width: 720px;
-    margin: 0 auto;
-  }
+  .wyg-wrap { max-width: 680px; margin: 0 auto; text-align: center; }
+  .wyg-category { font-weight: 800; font-size: 18px; color: #0f2b1a; margin: 32px 0 16px; text-align: left; }
   .wyg-item {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    font-size: 15px;
-    color: #374151;
-    line-height: 1.5;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+    text-align: left;
   }
-  .wyg-item .check { color: #22c55e; font-weight: 700; flex-shrink: 0; }
+  .wyg-item:last-child { border-bottom: none; }
+  .wyg-item .wyg-title { font-size: 14px; color: #1a1a1a; line-height: 1.5; }
+  .wyg-item .wyg-value { font-size: 13px; color: #9ca3af; margin-top: 2px; }
+  .wyg-item .wyg-value strong { color: #22c55e; }
+  .wyg-divider {
+    border: none;
+    border-top: 2px dashed #d1fae5;
+    margin: 24px 0;
+  }
+  .wyg-total {
+    text-align: center;
+    font-size: 17px;
+    color: #0f2b1a;
+    font-weight: 800;
+    line-height: 1.8;
+    margin-top: 8px;
+  }
+  .wyg-total .wyg-total-value { font-size: 20px; color: #15803d; }
+  .wyg-today { text-align: center; font-size: 15px; color: #dc2626; font-weight: 700; margin-top: 8px; }
+  .wyg-today .wyg-today-price { font-weight: 800; font-size: 22px; }
 
   /* WHO / NOT */
   .who-grid {
@@ -662,13 +673,56 @@ src="https://www.facebook.com/tr?id=1131772502456323&ev=PageView&noscript=1"
   <div class="section-inner">
     <h2 class="section-title">Apa Yang Akan Anda Dapatkan?</h2>
     <p class="section-sub">Semua yang lo butuhin buat langsung praktek</p>
-    <div class="wyg-grid">
-      <div class="wyg-item"><span class="check">✓</span> Video panduan lengkap 5 langkah</div>
-      <div class="wyg-item"><span class="check">✓</span> Kalkulator Harga Jual</div>
-      <div class="wyg-item"><span class="check">✓</span> Study Case Promo Efektif</div>
-      <div class="wyg-item"><span class="check">✓</span> 30 Resep Ricebowl Siap Jual</div>
-      <div class="wyg-item"><span class="check">✓</span> Studi kasus outlet dari 0 sampai 100juta+</div>
-      <div class="wyg-item"><span class="check">✓</span> Update materi terbaru — akses seumur hidup</div>
+    <div class="wyg-wrap">
+
+      <div class="wyg-category">🎯 CORE PROGRAM</div>
+
+      <div class="wyg-item">
+        <div>
+          <div class="wyg-title">✓ Sistem 5 Langkah Lengkap — 12 video, total 240 menit, akses kapan aja</div>
+          <div class="wyg-value">(Nilai: <strong>Rp499.000</strong>)</div>
+        </div>
+      </div>
+
+      <div class="wyg-category">🎁 BONUS (gratis kalau daftar sekarang)</div>
+
+      <div class="wyg-item">
+        <div>
+          <div class="wyg-title">✓ 30 Resep Rice Bowl Siap Jual + HPP & harga jual</div>
+          <div class="wyg-value">(Nilai: <strong>Rp249.000</strong>)</div>
+        </div>
+      </div>
+
+      <div class="wyg-item">
+        <div>
+          <div class="wyg-title">✓ Kalkulator Harga Jual otomatis</div>
+          <div class="wyg-value">(Nilai: <strong>Rp199.000</strong>)</div>
+        </div>
+      </div>
+
+      <div class="wyg-item">
+        <div>
+          <div class="wyg-title">✓ Study Case Promo Efektif</div>
+          <div class="wyg-value">(Nilai: <strong>Rp277.000</strong>)</div>
+        </div>
+      </div>
+
+      <div class="wyg-item">
+        <div>
+          <div class="wyg-title">✓ Update materi terbaru — akses seumur hidup</div>
+          <div class="wyg-value">(Nilai: Priceless)</div>
+        </div>
+      </div>
+
+      <hr class="wyg-divider">
+
+      <div class="wyg-total">
+        <strong>Total Value:</strong> <span class="wyg-total-value">Rp 1.224.000</span>
+      </div>
+      <div class="wyg-today">
+        Harga Hari Ini: <span class="wyg-today-price">Rp349.000</span>
+      </div>
+
     </div>
   </div>
 </section>
@@ -694,7 +748,7 @@ src="https://www.facebook.com/tr?id=1131772502456323&ev=PageView&noscript=1"
         <ul>
           <li>Yang hanya mau hasil tanpa praktek</li>
           <li>Mencari uang cepat</li>
-          <li>Komitmen untuk konsisten di bisnis</li>
+          <li>Tidak mau komitmen untuk konsisten di bisnis</li>
         </ul>
       </div>
     </div>
@@ -736,15 +790,17 @@ src="https://www.facebook.com/tr?id=1131772502456323&ev=PageView&noscript=1"
     <h2 class="section-title">Investasi</h2>
     <p class="section-sub">Sekali bayar. Akses selamanya.</p>
     <div class="pricing-box">
-      <div class="price-strike">Rp499.000</div>
+      <div class="price-label">Total isi paket senilai <strong>Rp 1.224.000</strong>, hari ini cuma:</div>
+      <div class="price-strike">Rp349.000</div>
       <div class="price-main">Rp149.000</div>
-      <div class="price-label">Harga spesial — akses seumur hidup</div>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Sekali bayar. Akses selamanya. Ga ada biaya tambahan.</p>
       <div id="countdown" class="countdown-timer">🔥 Promo berakhir dalam 23:59:59</div>
-      <div style="text-align:left;margin:20px 0;">
-        <p>✅ Sistem 5 Langkah</p>
-        <p>✅ Bonus 30 Resep Rice Bowl</p>
-        <p>✅ Checklist Memulai Bisnis Kuliner</p>
-        <p>✅ Akses Selamanya</p>
+      <div style="text-align:left;margin:16px 0;">
+        <p style="padding:3px 0;font-size:14px;color:#374151;">✅ Sistem 5 Langkah (12 video, 240 menit)</p>
+        <p style="padding:3px 0;font-size:14px;color:#374151;">✅ Bonus 30 Resep Rice Bowl Siap Jual</p>
+        <p style="padding:3px 0;font-size:14px;color:#374151;">✅ Kalkulator Harga Jual</p>
+        <p style="padding:3px 0;font-size:14px;color:#374151;">✅ Checklist Memulai Bisnis Kuliner</p>
+        <p style="padding:3px 0;font-size:14px;color:#374151;">✅ Akses Selamanya + Update Materi Gratis</p>
       </div>
       <a href="#form" class="btn-primary" style="font-size:17px; padding:16px 40px;">YA, SAYA MAU AKSES SEKARANG</a>
       <p class="price-note">Hasil setiap peserta bisa berbeda tergantung jenis usaha dan konsistensi penerapan.</p>

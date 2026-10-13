@@ -46,15 +46,15 @@ Admin dashboard is at /admin. It lets the allowlisted admin create/edit campaign
 - Honest negative/neutral reviews are permitted. Anti-bot protection (rate limiting / Turnstile) is a separate improvement.
 
 
-## Member-only webinars
-- Admin dashboard /admin > Webinar can create separate sessions, schedules and Zoom links, and review registrants.
-- Registration URLs are /webinar/SLUG. An event only becomes public when its status is open and a Zoom link is present.
-- The form sends a 6-digit email OTP through Supabase Auth. For this shared Supabase project, edit Authentication > Email Templates > Magic Link and Confirm Signup templates to include the Supabase variable {{ .Token }}. Keep the existing {{ .ConfirmationURL }} link in the Magic Link template so /admin login by link continues to work.
-- For production member volumes, configure a custom SMTP provider and suitable OTP rate limits in Supabase Auth.
-- Create a Restricted Scalev API key with ONLY order:list scope at https://app.scalev.com/setting/developers/api-keys. Set SCALEV_API_KEY in Vercel Preview / bonus-website. The Scalev connector token in ChatGPT is not automatically available to Vercel.
-- SCALEV_BUSINESS_UID is optional for a business-bound API key. The event's Scalev product ID determines eligibility (Ojol class = 412147).
-- Server validates the verified email's Supabase Auth access token and queries Scalev for a paid/settled order. Purchaser records are not copied into app database.
-- Public event API never returns Zoom URL. The registered and verified member receives Zoom URL and Google Calendar invitation.
-- Screenshot Storage bucket erlandoski-webinar-screenshots is private. Limit 1 MB per platform (GoFood, GrabFood, ShopeeFood).
-- Consent to show the member's name, problem and screenshots during the webinar is optional and separate from access. Never project screenshots unless review_consent is true.
-- Production readiness requires end-to-end OTP delivery and order-verification tests after environment configuration.
+## Member-only webinars — OTP-free
+- Admin dashboard at /admin > Webinar manages each event's individual schedule, Zoom link, participants, screenshot previews and CSV export.
+- Member registration path: /webinar/SLUG. New registration requires status open; already-registered members may regain their Zoom + Google Calendar links even after registration closes.
+- No OTP, SMTP, Magic Link, or customer Supabase Auth required on the webinar form. Existing admin login and its Supabase Magic Link settings are unchanged.
+- The member enters their Scalev purchase email + WhatsApp. Both must match on the same paid/settled order for the event's specific product. Normalization treats +62812..., 62812... and 0812... as the same number.
+- Set the server-only SCALEV_API_KEY in Vercel Preview branch bonus-website. Use a Restricted Scalev key with ONLY order:list scope. Scalev product ID for Kelas Laris Jualan di Ojol = 412147.
+- If the email and normalized phone already registered for the same webinar, Zoom and Google Calendar are returned immediately; optional inputs are not requested again. Email, phone, and Scalev order ID are unique per event.
+- The Google Calendar button pre-fills session title/time/description and Zoom URL. The user still needs to click Save in Google Calendar.
+- To limit guessing, an atomic HMAC-keyed Supabase rate-limit RPC throttles attempts. No cleartext source IP is kept in the throttle table. Email + phone verification is convenient but is not strong authentication: anybody who knows both can still retrieve the Zoom URL.
+- Public event endpoint never sends the Zoom URL. The Zoom URL is only returned after checking Scalev and an existing or new valid registration.
+- Screenshots are private in erlandoski-webinar-screenshots; optional consent required for displaying them during webinar.
+- Launch needs a real valid-order/manual end-to-end test (no automated paid-order test should create fake member registrations).

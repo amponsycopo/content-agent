@@ -5,6 +5,8 @@ import Link from 'next/link';
 const steps=[['Kenalan dulu','Isi data diri dan cerita singkat tentang brand atau produk.'],['Sebelum ikut kelas','Ceritakan titik awal perjalanan bisnismu.'],['Setelah ikut kelas','Apa yang dipelajari, dipraktikkan, dan dirasakan?'],['Evaluasi & harapan','Review jujurmu membantu kelas menjadi lebih baik.']];
 const categories=['Makanan berat','Camilan & snack','Minuman','Bakery & dessert','Frozen food','Lainnya','Belum menentukan produk'];
 const IMG=['image/jpeg','image/png','image/webp'];
+const MIN_ESSAY=50;
+const countText=value=>String(value??'').trim().replace(/\s+/g,' ').length;
 export default function BonusForm(){
  const {slug}=useParams(),[campaign,setCampaign]=useState(null),[questions,setQuestions]=useState([]),[stage,setStage]=useState(0),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState('');
  const [name,setName]=useState(''),[wa,setWa]=useState(''),[email,setEmail]=useState(''),[brand,setBrand]=useState(''),[category,setCategory]=useState(''),[photo,setPhoto]=useState(null);
@@ -29,8 +31,13 @@ export default function BonusForm(){
    if(!category)return 'Pilih kategori produk, termasuk jika belum menentukan produk.';
    if(photo&&(!IMG.includes(photo.type)||photo.size>3*1024*1024))return 'Foto maksimal 3 MB, berformat JPG, PNG atau WebP.';
   }
-  for(const q of currentQuestions){if(q.is_required&&!filled(answers[q.id]))return 'Jawab dulu: '+q.prompt}
-  if(stage===3&&testimonial.trim().length<12)return 'Tulis kesan atau kritik minimal 12 karakter.';
+  for(const q of currentQuestions){
+   const value=answers[q.id];
+   const hasAnswer=filled(value)&&!(typeof value==='string'&&!value.trim());
+   if(q.is_required&&!hasAnswer)return 'Jawab dulu: '+q.prompt;
+   if(q.input_type==='long_text'&&hasAnswer&&countText(value)<MIN_ESSAY)return 'Jawaban esai minimal 50 karakter: '+q.prompt;
+  }
+  if(stage===3&&countText(testimonial)<MIN_ESSAY)return 'Tulis kesan atau kritik minimal 50 karakter.';
   return '';
  }
  function go(next){setError('');setStage(next);window.scrollTo({top:0,behavior:'smooth'})}
@@ -55,7 +62,7 @@ export default function BonusForm(){
  function renderQuestion(q){
   const value=answers[q.id],choices=Array.isArray(q.options)?q.options:[];
   let field=null;
-  if(q.input_type==='long_text')field=<textarea rows={4} value={value||''} onChange={e=>answer(q.id,e.target.value)} placeholder="Tulis pengalamanmu di sini"/>;
+  if(q.input_type==='long_text')field=<div><textarea rows={4} maxLength={3000} value={value||''} onChange={e=>answer(q.id,e.target.value)} placeholder="Ceritakan pengalamanmu dengan cukup detail"/><p className="muted small">{countText(value)}/50 karakter minimum{q.is_required?'':' jika diisi'}</p></div>;
   else if(q.input_type==='short_text')field=<input value={value||''} onChange={e=>answer(q.id,e.target.value)}/>;
   else if(q.input_type==='number')field=<input type="number" value={value??''} onChange={e=>answer(q.id,e.target.value===''?'':Number(e.target.value))}/>;
   else if(q.input_type==='rating')field=<div className="actions" style={{justifyContent:'flex-start'}}>{[1,2,3,4,5].map(n=><button type="button" key={n} className={value===n?'':'outline'} onClick={()=>answer(q.id,n)}>{n}</button>)}</div>;
@@ -76,7 +83,7 @@ export default function BonusForm(){
  <label>Logo atau foto makanan/produk (opsional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setPhoto(e.target.files?.[0]||null)}/><span className="muted">Maksimal 3 MB. Bisa dilewati jika belum punya usaha.</span></label>
  <label>Email (opsional)<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="nama@email.com"/></label></div>}
  {stage!==0&&<div>{currentQuestions.map(renderQuestion)}</div>}
- {stage===3&&<div className="stack"><label>Kalau disuruh menceritakan pengalaman ikut kelas ini, apa yang ingin disampaikan? *<textarea rows={4} value={testimonial} onChange={e=>setTestimonial(e.target.value)} placeholder="Pengalaman apa adanya, boleh positif, biasa saja, atau kritik."/></label>
+ {stage===3&&<div className="stack"><label>Kalau disuruh menceritakan pengalaman ikut kelas ini, apa yang ingin disampaikan? *<textarea rows={4} maxLength={5000} value={testimonial} onChange={e=>setTestimonial(e.target.value)} placeholder="Pengalaman apa adanya, boleh positif, biasa saja, atau kritik."/></label><p className="muted small">{countText(testimonial)}/50 karakter minimum</p>
  <label className="option"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><span>Saya mengizinkan pengalaman/testimoni dan foto yang saya kirim digunakan untuk materi promosi kelas. <strong>Opsional</strong>—bonus tetap diberikan meskipun tidak dicentang.</span></label></div>}
  {error&&<p className="error">{error}</p>}
  <div className="actions">{stage>0?<button type="button" className="outline" disabled={saving} onClick={()=>go(stage-1)}>← Kembali</button>:<span/>}{stage<3?<button type="button" onClick={next}>Lanjut →</button>:<button type="button" disabled={saving} onClick={submit}>{saving?'Menyimpan...':'Kirim jawaban & buka bonus →'}</button>}</div></div></>}

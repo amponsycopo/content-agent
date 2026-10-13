@@ -4,11 +4,13 @@ import {db,validSlug} from '../../../lib/db';
 export const runtime='nodejs';
 const CATEGORY=['Makanan berat','Camilan & snack','Minuman','Bakery & dessert','Frozen food','Lainnya','Belum menentukan produk'];
 const IMAGES=['image/png','image/jpeg','image/webp'];
+const MIN_ESSAY=50;
+const countText=value=>String(value??'').trim().replace(/\s+/g,' ').length;
 function validateQuestions(questions,answers){
  const snapshot={};
  for(const q of questions){
   const value=answers[q.id];
-  const blank=value===undefined||value===null||value===''||(Array.isArray(value)&&!value.length);
+  const blank=value===undefined||value===null||(typeof value==='string'&&!value.trim())||(Array.isArray(value)&&!value.length);
   if(blank){if(q.is_required)throw Error('Jawab dulu: '+q.prompt);continue}
   if(q.input_type==='single_choice'&&(!Array.isArray(q.options)||!q.options.includes(value)))throw Error('Pilihan tidak valid.');
   if(q.input_type==='multiple_choice'&&(!Array.isArray(value)||value.length>20||value.some(v=>!q.options.includes(v))))throw Error('Pilihan tidak valid.');
@@ -16,6 +18,7 @@ function validateQuestions(questions,answers){
   if(q.input_type==='number'&&(typeof value!=='number'||!Number.isFinite(value)))throw Error('Angka tidak valid.');
   if(q.input_type==='yes_no'&&typeof value!=='boolean')throw Error('Ya/tidak tidak valid.');
   if(['short_text','long_text'].includes(q.input_type)&&(typeof value!=='string'||value.length>(q.input_type==='long_text'?3000:500)))throw Error('Jawaban tidak valid.');
+  if(q.input_type==='long_text'&&countText(value)<MIN_ESSAY)throw Error('Jawaban esai minimal 50 karakter: '+q.prompt);
   snapshot[q.id]={question:q.prompt,answer:value};
  }
  return snapshot;
@@ -28,7 +31,8 @@ export async function POST(req){
   const p=JSON.parse(raw);
   if(p.website)return NextResponse.json({error:'Permintaan tidak valid.'},{status:400});
   const name=String(p.full_name||'').trim(),wa=String(p.whatsapp||'').trim(),email=String(p.email||'').trim().toLowerCase(),brand=String(p.brand_name||'').trim(),category=String(p.brand_category||''),testimonial=String(p.testimonial||'').trim();
-  if(!validSlug(p.slug)||name.length<2||name.length>150||!/^\+?[\d\s()-]{8,25}$/.test(wa)||email.length>254||(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||brand.length>150||!CATEGORY.includes(category)||testimonial.length<12||testimonial.length>5000)return NextResponse.json({error:'Periksa nama, WhatsApp, kategori dan kesan kelas.'},{status:400});
+  if(!validSlug(p.slug)||name.length<2||name.length>150||!/^\+?[\d\s()-]{8,25}$/.test(wa)||email.length>254||(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||brand.length>150||!CATEGORY.includes(category))return NextResponse.json({error:'Periksa nama, WhatsApp, dan kategori produk.'},{status:400});
+  if(countText(testimonial)<MIN_ESSAY||testimonial.length>5000)return NextResponse.json({error:'Kesan kelas harus berisi minimal 50 karakter.'},{status:400});
   const photo=form.get('brand_photo');
   if(photo&&(!(photo instanceof File)||!IMAGES.includes(photo.type)||photo.size>3*1024*1024))return NextResponse.json({error:'Foto harus JPG, PNG, atau WebP maksimal 3 MB.'},{status:400});
   const s=db(),{data:c}=await s.from('bonus_campaigns').select('id,reward_storage_path,status').eq('slug',p.slug).single();

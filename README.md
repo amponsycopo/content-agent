@@ -44,3 +44,17 @@ Admin dashboard is at /admin. It lets the allowlisted admin create/edit campaign
 - No names, email, WhatsApp, brand photo or promo consent are sent to Groq; only the essay text and associated question are sent.
 - Groq network errors or unconfigured key fall back to deterministic checks so genuine members can still receive a bonus.
 - Honest negative/neutral reviews are permitted. Anti-bot protection (rate limiting / Turnstile) is a separate improvement.
+
+
+## Member-only webinars
+- Admin dashboard /admin > Webinar can create separate sessions, schedules and Zoom links, and review registrants.
+- Registration URLs are /webinar/SLUG. An event only becomes public when its status is open and a Zoom link is present.
+- The form sends a 6-digit email OTP through Supabase Auth. For this shared Supabase project, edit Authentication > Email Templates > Magic Link and Confirm Signup templates to include the Supabase variable {{ .Token }}. Keep the existing {{ .ConfirmationURL }} link in the Magic Link template so /admin login by link continues to work.
+- For production member volumes, configure a custom SMTP provider and suitable OTP rate limits in Supabase Auth.
+- Create a Restricted Scalev API key with ONLY order:list scope at https://app.scalev.com/setting/developers/api-keys. Set SCALEV_API_KEY in Vercel Preview / bonus-website. The Scalev connector token in ChatGPT is not automatically available to Vercel.
+- SCALEV_BUSINESS_UID is optional for a business-bound API key. The event's Scalev product ID determines eligibility (Ojol class = 412147).
+- Server validates the verified email's Supabase Auth access token and queries Scalev for a paid/settled order. Purchaser records are not copied into app database.
+- Public event API never returns Zoom URL. The registered and verified member receives Zoom URL and Google Calendar invitation.
+- Screenshot Storage bucket erlandoski-webinar-screenshots is private. Limit 1 MB per platform (GoFood, GrabFood, ShopeeFood).
+- Consent to show the member's name, problem and screenshots during the webinar is optional and separate from access. Never project screenshots unless review_consent is true.
+- Production readiness requires end-to-end OTP delivery and order-verification tests after environment configuration.

@@ -16,7 +16,7 @@ Configure under Vercel project erlanv2 -> Settings -> Environment Variables -> P
 - SUPABASE_SECRET_KEY=sb_secret_... (server ONLY, do not expose in browser, do not commit)
 - ADMIN_EMAIL=exact permitted Supabase Auth email address
 
-Magic-link email authentication must be enabled in Supabase Auth and https://bonus.erlandoski.com/admin added as permitted redirect URL.
+Enable the Email provider in Supabase Auth. Admin login at /admin uses email and password with `signInWithPassword`; SMTP, OTP and magic links are not required. The account matching ADMIN_EMAIL must have a confirmed email and a unique password. Configure that account through the Supabase Auth Admin API (`updateUserById` with `email_confirm: true` and `password`) in a trusted local/server environment using a secret key. Never update auth.users directly, commit credentials, or share the password in chat. The existing server-side `admin()` guard validates the access token and ADMIN_EMAIL for both bonus and webinar admin APIs.
 
 ## User journey
 1. Member opens /bonus/kelas-laris-jualan-di-ojol.
@@ -49,7 +49,7 @@ Admin dashboard is at /admin. It lets the allowlisted admin create/edit campaign
 ## Member-only webinars — OTP-free
 - Admin dashboard at /admin > Webinar manages each event's individual schedule, Zoom link, participants, screenshot previews and CSV export.
 - Member registration path: /webinar/SLUG. New registration requires status open; already-registered members may regain their Zoom + Google Calendar links even after registration closes.
-- No OTP, SMTP, Magic Link, or customer Supabase Auth required on the webinar form. Existing admin login and its Supabase Magic Link settings are unchanged.
+- No OTP, SMTP, Magic Link, or customer Supabase Auth required on the webinar form. Admin login uses a separate Supabase Auth email/password session, checked by `admin()` on the server.
 - The member enters their Scalev purchase email + WhatsApp. Both must match on the same paid/settled order for the event's specific product. Normalization treats +62812..., 62812... and 0812... as the same number.
 - Set the server-only SCALEV_API_KEY in Vercel Preview branch bonus-website. Use a Restricted Scalev key with ONLY order:list scope. Scalev product ID for Kelas Laris Jualan di Ojol = 412147.
 - If the email and normalized phone already registered for the same webinar, Zoom and Google Calendar are returned immediately; optional inputs are not requested again. Email, phone, and Scalev order ID are unique per event.

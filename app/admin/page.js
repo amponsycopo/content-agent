@@ -6,7 +6,7 @@ import WebinarAdmin from './WebinarAdmin';
 const blank=()=>({slug:'',title:'',product_name:'',description:'',status:'draft',questions:[{prompt:'',step:2,input_type:'long_text',help_text:'',options:[],is_required:true}]});
 const blankQ=()=>({prompt:'',step:3,input_type:'long_text',help_text:'',options:[],is_required:true});
 export default function Admin(){
- const [client,setClient]=useState(null),[session,setSession]=useState(null),[email,setEmail]=useState(''),[notice,setNotice]=useState(''),[campaigns,setCampaigns]=useState([]),[submissions,setSubmissions]=useState([]),[edit,setEdit]=useState(blank()),[view,setView]=useState('campaigns'),[busy,setBusy]=useState(false);
+ const [client,setClient]=useState(null),[session,setSession]=useState(null),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[loggingIn,setLoggingIn]=useState(false),[notice,setNotice]=useState(''),[campaigns,setCampaigns]=useState([]),[submissions,setSubmissions]=useState([]),[edit,setEdit]=useState(blank()),[view,setView]=useState('campaigns'),[busy,setBusy]=useState(false);
  useEffect(()=>{
   const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if(!u||!k){setNotice('Konfigurasi Supabase belum lengkap.');return}
@@ -27,7 +27,16 @@ export default function Admin(){
   try{const a=await call('?view=campaigns'),b=await call('?view=submissions');setCampaigns(a.campaigns||[]);setSubmissions(b.submissions||[])}
   catch(e){setNotice(e.message)}
  }
- async function login(e){e.preventDefault();if(!client)return;const {error}=await client.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin+'/admin'}});setNotice(error?error.message:'Cek email untuk link login admin.')}
+ async function login(e){
+  e.preventDefault();if(!client||loggingIn)return;
+  setLoggingIn(true);setNotice('');
+  try{
+   const {error}=await client.auth.signInWithPassword({email:email.trim(),password});
+   if(error)throw error;
+   setPassword('');
+  }catch(e){setNotice(e.message||'Login gagal. Silakan coba lagi.')}
+  finally{setLoggingIn(false)}
+ }
  function load(c){setEdit({...c,questions:(c.bonus_questions||[]).slice().sort((x,y)=>x.position-y.position).map(q=>({prompt:q.prompt,step:q.step,input_type:q.input_type,help_text:q.help_text||'',options:q.options||[],is_required:q.is_required}))});setNotice('')}
  async function save(){setBusy(true);setNotice('');try{const d=await call('?action=save','POST',JSON.stringify(edit));setEdit(x=>({...x,id:d.id}));await refresh();setNotice('Campaign tersimpan.')}catch(e){setNotice(e.message)}finally{setBusy(false)}}
  async function upload(file){if(!file||!edit.id)return setNotice('Simpan campaign terlebih dahulu.');setBusy(true);try{const f=new FormData();f.set('file',file);f.set('campaign_id',edit.id);const d=await call('?action=upload','POST',f);setNotice('File bonus tersimpan: '+d.filename);await refresh()}catch(e){setNotice(e.message)}finally{setBusy(false)}}
@@ -39,7 +48,7 @@ export default function Admin(){
  }
  const patch=(k,v)=>setEdit(x=>({...x,[k]:v}));
  const patchQ=(i,k,v)=>setEdit(x=>({...x,questions:x.questions.map((q,j)=>i===j?{...q,[k]:v}:q)}));
- if(!session)return <main className="wrap"><header className="nav"><strong>ERLAN<span className="accent">.</span></strong><span>ADMIN</span></header><section className="hero"><p className="eyebrow">AKSES TERBATAS</p><h1>Dashboard Bonus</h1><p>Hanya email admin yang didaftarkan di Vercel yang bisa mengelola data.</p></section><form className="panel" onSubmit={login}><label>Email admin<input type="email" required value={email} onChange={e=>setEmail(e.target.value)} /></label><button type="submit">Kirim link login →</button>{notice&&<p className="muted">{notice}</p>}</form></main>;
+ if(!session)return <main className="wrap"><header className="nav"><strong>ERLAN<span className="accent">.</span></strong><span>ADMIN</span></header><section className="hero"><p className="eyebrow">AKSES TERBATAS</p><h1>Dashboard Bonus</h1><p>Masuk dengan email dan password akun admin.</p></section><form className="panel" onSubmit={login}><label>Email admin<input type="email" name="email" autoComplete="username" required value={email} onChange={e=>setEmail(e.target.value)} /></label><label>Password<input type="password" name="password" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)} /></label><button type="submit" disabled={!client||loggingIn}>{loggingIn?'Memproses login…':'Masuk →'}</button>{notice&&<p className="muted" role="alert">{notice}</p>}</form></main>;
  return <main className="wrap admin"><header className="nav"><Link href="/">ERLAN.</Link><span>ADMIN</span><button className="outline" onClick={()=>client?.auth.signOut()}>Keluar</button></header><section className="hero"><p className="eyebrow">MEMBER EXPERIENCE</p><h1>Bonus & Webinar Member</h1><p>{campaigns.length} campaign · {submissions.length} testimoni masuk · {submissions.filter(s=>s.promo_consent).length} izin promosi</p></section>
  <div className="tabs"><button className={view==='campaigns'?'chosen':''} onClick={()=>setView('campaigns')}>Kuesioner</button><button className={view==='submissions'?'chosen':''} onClick={()=>setView('submissions')}>Testimoni</button><button className={view==='webinars'?'chosen':''} onClick={()=>setView('webinars')}>Webinar</button><button className="outline" onClick={refresh}>Refresh</button></div>
  {notice&&<p className="error">{notice}</p>}

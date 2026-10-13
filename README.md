@@ -34,3 +34,13 @@ Admin dashboard is at /admin. It lets the allowlisted admin create/edit campaign
 - Public visitors are not verified Scalev purchasers. Add purchase eligibility validation if required.
 - Submissions have basic duplicate and spam guards, not full anti-abuse/rate limiting.
 - Promotional testimonial usage requires separate opt-in; critical feedback still unlocks the same bonus.
+
+
+## Feedback quality checks
+- Server-side deterministic filter blocks lengthy repeated letters, very low alphabet diversity and repeated filler words.
+- Optional Groq check evaluates all completed essay answers in one JSON-mode request before saving and reward unlock.
+- Add GROQ_API_KEY as a **server-only sensitive environment variable** to the **Preview / bonus-website** branch in Vercel. Never use NEXT_PUBLIC_GROQ_API_KEY.
+- Optional GROQ_MODEL defaults to llama-3.3-70b-versatile.
+- No names, email, WhatsApp, brand photo or promo consent are sent to Groq; only the essay text and associated question are sent.
+- Groq network errors or unconfigured key fall back to deterministic checks so genuine members can still receive a bonus.
+- Honest negative/neutral reviews are permitted. Anti-bot protection (rate limiting / Turnstile) is a separate improvement.

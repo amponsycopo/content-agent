@@ -1,6 +1,7 @@
 import {NextResponse} from 'next/server';
 import {randomBytes,createHash} from 'node:crypto';
 import {db,validSlug} from '../../../lib/db';
+import {checkFeedbackQuality} from '../../../lib/feedback-quality';
 export const runtime='nodejs';
 const CATEGORY=['Makanan berat','Camilan & snack','Minuman','Bakery & dessert','Frozen food','Lainnya','Belum menentukan produk'];
 const IMAGES=['image/png','image/jpeg','image/webp'];
@@ -43,6 +44,15 @@ export async function POST(req){
   let snapshot;try{snapshot=validateQuestions(q,answers)}catch(e){return NextResponse.json({error:e.message},{status:400})}
   const {count}=await s.from('bonus_submissions').select('id',{count:'exact',head:true}).eq('campaign_id',c.id).eq('whatsapp',wa);
   if((count||0)>=3)return NextResponse.json({error:'Nomor ini sudah mencapai batas pengiriman.'},{status:429});
+  // Check essay content BEFORE storing a submission or issuing a reward token.
+  // Do not send member names, WhatsApp numbers, emails, brand photos or consent to Groq.
+  const essayItems=q.filter(item=>item.input_type==='long_text'&&typeof answers[item.id]==='string'&&answers[item.id].trim())
+    .map(item=>({id:item.id,question:item.prompt,answer:answers[item.id].trim()}));
+  essayItems.push({id:'testimonial',question:'Bagaimana pengalaman mengikuti kelas ini?',answer:testimonial});
+  const quality=await checkFeedbackQuality(essayItems);
+  if(!quality.ok)return NextResponse.json({
+    error:quality.message,field_id:quality.field_id
+  },{status:422});
   const token=randomBytes(32).toString('hex'),hash=createHash('sha256').update(token).digest('hex'),consent=p.promo_consent===true;
   const {data:sub,error:se}=await s.from('bonus_submissions').insert({campaign_id:c.id,full_name:name,email:email||null,whatsapp:wa,brand_name:brand||null,brand_category:category,profile_completed_at:new Date().toISOString(),answers:snapshot,testimonial,promo_consent:consent,consent_given_at:consent?new Date().toISOString():null,unlock_token_sha256:hash}).select('id').single();
   if(se||!sub)throw Error('Gagal menyimpan jawaban.');

@@ -48,7 +48,14 @@ export default function BonusForm(){
   try{
    const data={slug,full_name:name,whatsapp:wa,email,brand_name:brand,brand_category:category,testimonial,promo_consent:consent,answers,website:''};
    const f=new FormData();f.set('data',JSON.stringify(data));if(photo)f.set('brand_photo',photo);
-   const r=await fetch('/api/submit',{method:'POST',body:f});const j=await r.json();if(!r.ok)throw Error(j.error||'Gagal mengirim jawaban.');
+   const r=await fetch('/api/submit',{method:'POST',body:f});const j=await r.json();
+   if(!r.ok){
+    if(j.field_id&&j.field_id!=='testimonial'){
+     const invalid=questions.find(q=>q.id===j.field_id);
+     if(invalid?.step)setStage(invalid.step-1);
+    }
+    throw Error(j.error||'Gagal mengirim jawaban.');
+   }
    setReceipt(j);localStorage.setItem('bonus-receipt:'+slug,JSON.stringify(j));window.scrollTo({top:0,behavior:'smooth'});
   }catch(e){setError(e.message)}finally{setSaving(false)}
  }
@@ -87,5 +94,5 @@ export default function BonusForm(){
  <label className="option"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><span>Saya mengizinkan pengalaman/testimoni dan foto yang saya kirim digunakan untuk materi promosi kelas. <strong>Opsional</strong>—bonus tetap diberikan meskipun tidak dicentang.</span></label></div>}
  {error&&<p className="error">{error}</p>}
  <div className="actions">{stage>0?<button type="button" className="outline" disabled={saving} onClick={()=>go(stage-1)}>← Kembali</button>:<span/>}{stage<3?<button type="button" onClick={next}>Lanjut →</button>:<button type="button" disabled={saving} onClick={submit}>{saving?'Menyimpan...':'Kirim jawaban & buka bonus →'}</button>}</div></div></>}
- <footer>Data pribadi hanya dipakai untuk pengelolaan kelas dan bonus. Izin promosi bersifat opsional.</footer></main>;
+ <footer>Data pribadi digunakan untuk pengelolaan kelas dan bonus. Jawaban esai dapat diperiksa menggunakan AI Groq untuk mendeteksi spam, tanpa mengirim kolom nama, nomor WhatsApp, email atau foto. Izin promosi bersifat opsional.</footer></main>;
 }

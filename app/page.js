@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Home(){return <main className="wrap"><header className="nav"><strong>ERLAN<span className="accent">.</span></strong><span>BONUS MEMBER</span></header><section className="hero"><p className="eyebrow">KHUSUS MEMBER KELAS</p><h1>Terima kasih sudah belajar bareng.</h1><p>Isi pengalaman yang jujur setelah mengikuti kelas. Setelah selesai, bonus member langsung terbuka.</p><Link className="button" href="/bonus/kelas-laris-jualan-di-ojol">Isi kuesioner kelas ojol →</Link></section><footer>Bonus Member Erlan</footer></main>}

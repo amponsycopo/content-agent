@@ -47,6 +47,10 @@ Admin dashboard is at /admin. It lets the allowlisted admin create/edit campaign
 
 
 ## Member-only webinars — OTP-free
+- Webinar slugs remain unique across drafts, published sessions and archives; repeated titles are allowed. Duplicate slugs return HTTP 409 with a specific message.
+- Archive closes registration and moves the event to the admin Archive list; participants and screenshots remain accessible to the admin. Previously registered members retain the existing closed-event access flow. Restore keeps registration closed until explicitly reopened.
+- Permanent deletion is limited to drafts that have never been published and have no participants, with an explicit confirmation. The database trigger enforces this too, preventing participant/screenshot cascade deletion and preserving publication history even if status is changed back to draft.
+- Apply `database/webinar-lifecycle.sql` as a Supabase migration before deploying the lifecycle UI/API. It adds archive/publication timestamps and the deletion guard only to webinar_events; no Threads or bonus table changes.
 - Admin dashboard at /admin > Webinar manages each event's individual schedule, Zoom link, participants, screenshot previews and CSV export.
 - Member registration path: /webinar/SLUG. New registration requires status open; already-registered members may regain their Zoom + Google Calendar links even after registration closes.
 - No OTP, SMTP, Magic Link, or customer Supabase Auth required on the webinar form. Admin login uses a separate Supabase Auth email/password session, checked by `admin()` on the server.

@@ -13,7 +13,7 @@ export async function GET(req){
  if(!await permitted(req))return noStore({error:'Akses admin ditolak.'},403);
  const s=db(),p=new URL(req.url).searchParams,view=p.get('view');
  if(view==='events'){
-  const {data,error}=await s.from('webinar_events').select('*').order('starts_at',{ascending:false});
+  const {data,error}=await s.from('webinar_events').select('*,webinar_registrations(count)').order('starts_at',{ascending:false});
   return error?noStore({error:'Gagal memuat webinar.'},500):noStore({events:data});
  }
  if(view==='registrations'){
@@ -51,8 +51,9 @@ export async function POST(req){
    scalev_product_id:productId,status,updated_at:new Date().toISOString()};
   const s=db();
   if(id){
-   const {error}=await s.from('webinar_events').update(values).eq('id',id);
+   const {data,error}=await s.from('webinar_events').update(values).eq('id',id).is('archived_at',null).select('id').maybeSingle();
    if(error)throw error;
+   if(!data)return noStore({error:'Webinar tidak ditemukan atau masih diarsipkan. Pulihkan dahulu sebelum mengedit.'},409);
    return noStore({id});
   }
   const {data,error}=await s.from('webinar_events').insert(values).select('id').single();
@@ -60,6 +61,33 @@ export async function POST(req){
   return noStore({id:data.id});
  }catch(err){
   console.warn('webinar_admin_save_failed',err?.code||'error');
+  if(err?.code==='23505')return noStore({error:'Slug sudah dipakai webinar lain, termasuk yang diarsipkan. Gunakan slug berbeda; judul boleh sama.'},409);
+  if(err?.code==='23514')return noStore({error:'Webinar arsip tidak dapat dibuka. Pulihkan dahulu sebelum mengedit.'},409);
   return noStore({error:'Gagal menyimpan webinar. Pastikan slug belum dipakai.'},500);
+ }
+}
+export async function PATCH(req){
+ if(!await permitted(req))return noStore({error:'Akses admin ditolak.'},403);
+ try{
+  const {id,action}=await req.json();
+  if(!validUuid(id)||!['archive','restore'].includes(action))return noStore({error:'Operasi webinar tidak valid.'},400);
+  const values=action==='archive'?{archived_at:new Date().toISOString(),status:'closed'}:{archived_at:null};
+  const {data,error}=await db().from('webinar_events').update({...values,updated_at:new Date().toISOString()}).eq('id',id).select('id').maybeSingle();
+  if(error)throw error;
+  return data?noStore({id:data.id}):noStore({error:'Webinar tidak ditemukan.'},404);
+ }catch{ return noStore({error:'Gagal mengubah arsip webinar.'},500) }
+}
+export async function DELETE(req){
+ if(!await permitted(req))return noStore({error:'Akses admin ditolak.'},403);
+ const id=new URL(req.url).searchParams.get('id');
+ if(!validUuid(id))return noStore({error:'Webinar tidak valid.'},400);
+ try{
+  // The database trigger also rejects published events and drafts with participants.
+  const {data,error}=await db().from('webinar_events').delete().eq('id',id).select('id').maybeSingle();
+  if(error)throw error;
+  return data?noStore({id:data.id}):noStore({error:'Webinar tidak ditemukan.'},404);
+ }catch(err){
+  if(err?.code==='23514'||err?.code==='23503')return noStore({error:'Hanya draft yang belum pernah dipublish dan belum punya peserta yang dapat dihapus. Arsipkan webinar ini.'},409);
+  return noStore({error:'Gagal menghapus draft webinar.'},500);
  }
 }

@@ -15,7 +15,8 @@ async function handle(req,action){
   const client=process.env.INSIGHTS_OAUTH_CLIENT_ID;
   if(!client)return json({error:'Koneksi ChatGPT belum dikonfigurasi.'},503);
   const id=new URL(req.url).searchParams.get('authorization_id');
-  if(!/^[a-f0-9-]{36}$/i.test(id||''))return json({error:'Permintaan izin tidak valid.'},400);
+  // Supabase authorization IDs are opaque URL-safe strings, not client UUIDs.
+  if(!/^[A-Za-z0-9_-]{1,256}$/.test(id||''))return json({error:'Permintaan izin tidak valid.'},400);
   const d=await authCall(req,id);
   // No automatic approval or redirect for previously approved requests.
   if(!d.authorization_id)return json({error:'Mulai ulang koneksi dari ChatGPT.'},409);

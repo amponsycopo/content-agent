@@ -22,7 +22,7 @@ async function handle(req,action){
   if(!d.authorization_id)return json({error:'Mulai ulang koneksi dari ChatGPT.'},409);
   if(d.client?.id!==client||!chatgptCallback(d.redirect_uri))return json({error:'Aplikasi tidak diizinkan.'},403);
   const scopes=String(d.scope||'').split(' ').filter(Boolean);
-  if(scopes.some(x=>!['openid','email','profile'].includes(x)))return json({error:'Izin yang diminta tidak didukung.'},403);
+  if(scopes.some(x=>!['openid','email','profile','offline_access'].includes(x)))return json({error:'Izin yang diminta tidak didukung.'},403);
   if(!action)return json({client_name:'ChatGPT',scope:d.scope,redirect_uri:d.redirect_uri});
   const answer=await authCall(req,id,action);
   const u=new URL(answer.redirect_url);u.search='';
